@@ -65,7 +65,7 @@ function assign(it, attributes) {
   }
 
   //  Interactive
-  it.interactive = false;
+  // it.interactive = false;
 
   return it;
 }

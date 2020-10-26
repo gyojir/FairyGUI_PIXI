@@ -64,9 +64,11 @@ function mapSizeBy(func, {size, corner}) {
 function setGraphics({func, lineSize, lineColor, fillColor, size}) {
   const it = new Graphics();
 
-  it.lineStyle(lineSize, lineColor);
+  const lineAlpha = (lineColor >>> 24) / 0xFF;
+  it.lineStyle(lineSize, lineColor, lineAlpha);
 
-  it.beginFill(fillColor);
+  const fillAlpha = (fillColor >>> 24) / 0xFF;
+  it.beginFill(fillColor, fillAlpha);
 
   it[func](...size);
 

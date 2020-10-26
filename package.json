@@ -6,10 +6,10 @@
     "dos2unix": "find src -type f -exec sed -i 's/^M$//' {} +",
     "clean": "rm -rf dist",
     "webpack": "webpack --config ./tools/build.js",
-    "build": "npm run clean && NODE_ENV=production npm run webpack -- --env.mode=production",
-    "watch": "npm run clean && NODE_ENV=development npm run webpack -- --env.mode=development --watch",
+    "build": "npm run clean && cross-env NODE_ENV=production npm run webpack -- --env.mode=production",
+    "watch": "npm run clean && cross-env NODE_ENV=development npm run webpack -- --env.mode=development --watch",
     "dev-server": "webpack-dev-server --config ./tools/build.js --host 0.0.0.0",
-    "start": "npm run clean && NODE_ENV=development npm run dev-server -- --env.mode=development --open"
+    "start": "npm run clean && cross-env NODE_ENV=development npm run dev-server -- --env.mode=development --open"
   },
   "main": "src/index.js",
   "keywords": [
@@ -33,6 +33,7 @@
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
     "copy-webpack-plugin": "^4.6.0",
+    "cross-env": "^7.0.2",
     "documentation": "^9.3.1",
     "eslint": "^5.16.0",
     "eslint-config-google": "^0.12.0",

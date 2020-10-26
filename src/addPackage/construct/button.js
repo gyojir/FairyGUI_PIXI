@@ -14,7 +14,7 @@ export const Button = curry(
       .on('pointerupoutside', onButtonUpOutSide);
 
     const pages = pipe(
-      search(({name}) => name === 'image'),
+      search(({name}) => name === 'image' || name === 'graph'),
       (arr) => [].concat(arr),
       map(getImage),
       mergeAll,
@@ -40,7 +40,8 @@ export const Button = curry(
     }
 
     function setState(state) {
-      it.setChildIndex(pages[state], it.children.length - 1);
+      Object.values(pages).forEach(v=>v.visible=false);
+      pages[state].visible = true;
     }
 
     function onButtonUp(event) {
