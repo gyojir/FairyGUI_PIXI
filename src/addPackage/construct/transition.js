@@ -202,7 +202,7 @@ function transition({attributes, elements}) {
     timeLine = elements
       .map(prop('attributes'))
       .map(process)
-      .reduce(addTimeFrame, anime.timeline());
+      .reduce(addTimeFrame, anime.timeline({autoplay: false}));
   } catch (e) {
     throw new Error(
       `Occur when create Transition: ${attributes.name}, ${e}`,
