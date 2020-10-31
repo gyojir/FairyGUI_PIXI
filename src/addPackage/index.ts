@@ -9,6 +9,7 @@ import {fnt2js} from './parse/fnt2js';
 import {select} from '../util';
 import {construct} from './construct';
 import {TextureConfig, SourceElement, assertIsDefined, XmlElem, ResourceAttribute} from '../def/index';
+
 declare global {
   var temp: {
     getSource: (key: string) => SourceElement;

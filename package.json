@@ -6,12 +6,15 @@
     "dos2unix": "find src -type f -exec sed -i 's/^M$//' {} +",
     "clean": "rm -rf dist",
     "webpack": "webpack --config ./tools/build.js",
-    "build": "npm run clean && cross-env NODE_ENV=production npm run webpack -- --env.mode=production",
+    "build-dts": "tsc",
+    "build": "npm run clean && npm run build-dts && cross-env NODE_ENV=production npm run webpack -- --env.mode=production",
     "watch": "npm run clean && cross-env NODE_ENV=development npm run webpack -- --env.mode=development --watch",
     "dev-server": "webpack-dev-server --config ./tools/build.js --host 0.0.0.0",
-    "start": "npm run clean && cross-env NODE_ENV=development npm run dev-server -- --env.mode=development --open"
+    "start": "npm run clean && cross-env NODE_ENV=development npm run dev-server -- --env.mode=development --open",
+    "prepare": "npm run build"
   },
-  "main": "src/index.js",
+  "main": "dist/fairyGUI_PIXI.js",
+  "types": "dist/index.d.ts",
   "keywords": [
     "pixi.js",
     "FairyGUI"

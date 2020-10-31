@@ -1,18 +1,14 @@
 //  Imports
 const {resolve} = require('path');
-const {ProgressPlugin, optimize} = require('webpack');
-const {ModuleConcatenationPlugin} = optimize;
+const {ProgressPlugin} = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 //  Path
 const {mapObjIndexed, call} = require('ramda');
 const {
   getSourceDir: sourceDir,
-  getTestDir: testDir,
   getProductDir: productDir,
   getPublicPath: publicPath,
-  getAssetsDir: assetsDir,
   getBaseDir: baseDir,
   getToolDir: toolDir,
 } = mapObjIndexed(call)(require('../constant'));
@@ -21,7 +17,7 @@ const {
 module.exports = function(...args) {
   return {
     //  Entry   ===========================================
-    entry: resolve(testDir, 'main.ts'),
+    entry: resolve(sourceDir, 'index.ts'),
     resolve: {
       extensions: [".js", ".json", ".ts"],
     },
@@ -32,32 +28,7 @@ module.exports = function(...args) {
       filename: 'fairyGUI_PIXI.js',
       publicPath: publicPath,
       library: 'fairyGUI_PIXI',
-    },
-
-    //  Optimization    ====================================
-    optimization: {
-      usedExports: true,
-      sideEffects: false,
-      concatenateModules: true,
-
-      splitChunks: {
-        chunks: 'all',
-        minSize: 0,
-        maxInitialRequests: Infinity,
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name(module) {
-              const packageName =
-                module.context.match(
-                  /[\\/]node_modules[\\/](.*?)([\\/]|$)/,
-                )[1];
-
-              return `${packageName.replace('@', '')}`;
-            },
-          },
-        },
-      },
+      libraryTarget: 'umd',
     },
 
     //  Module =============================================
@@ -67,7 +38,6 @@ module.exports = function(...args) {
           test: /\.ts$/,
           include: [
             sourceDir,
-            testDir,
           ],
           sideEffects: false,
           use: [
@@ -90,18 +60,12 @@ module.exports = function(...args) {
     plugins: [
       new ProgressPlugin(),
 
-      new ModuleConcatenationPlugin(),
-
       new HtmlWebpackPlugin({
         filename: 'index.html',
         favicon: resolve(baseDir, 'favicon.ico'),
         template: resolve(baseDir, 'index.html'),
         hash: true,
       }),
-
-      new CopyWebpackPlugin([
-        {from: assetsDir, to: resolve(productDir, 'assets')},
-      ]),
     ],
     //  END ============================================
   };
