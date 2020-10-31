@@ -1,62 +1,64 @@
-import {pipe, map, curry, reduce, find, mergeAll} from 'ramda';
+import {map, curry, reduce, find, mergeAll} from 'ramda';
 import {toPair, search} from '../../util';
+import {SourceElement, FComponent, XmlElem} from '../../def/index';
 
-export const Button = curry(function(source, it) {
+export const Button = curry(function(source: SourceElement, it: FComponent) {
   it.interactive = true;
   it.buttonMode = true;
 
-  it.on('pointerdown', onButtonDown).on('pointerover', onButtonOver).on('pointerup', onButtonUp).on('pointerout', onButtonOut).on('pointerupoutside', onButtonUpOutSide);
+  it
+    .on('pointerdown', onButtonDown)
+    .on('pointerover', onButtonOver)
+    .on('pointerup', onButtonUp)
+    .on('pointerout', onButtonOut)
+    .on('pointerupoutside', onButtonUpOutSide);
 
-  const pages = pipe(search(({
-    name,
-  }) => name === 'image' || name === 'graph'), (arr) => [].concat(arr), map(getImage), mergeAll)(source);
+  const pages =
+    mergeAll(
+      map(getImage)(
+        ((arr) => ([] as XmlElem[]).concat(arr))(
+          search(({name}: XmlElem) => name === 'image' || name === 'graph', source))));
 
   setState(0);
 
   return it;
 
-  function getImage({
-    attributes,
-    elements,
-  }) {
+  function getImage({attributes, elements}: XmlElem) {
     const image = it.getChildByName(attributes.name);
+    const indexes = toPair(find(({name}) => name === 'gearDisplay', elements)?.attributes.pages);
 
-    const indexes = toPair(find(({
-      name,
-    }) => name === 'gearDisplay', elements).attributes.pages);
-
-    return reduce((pages, index) => {
+    return reduce<number, {[x: number]: PIXI.DisplayObject}>((pages, index) => {
       pages[index] = image;
       return pages;
     }, {}, indexes);
   }
 
-  function setState(state) {
+  function setState(state: number) {
     Object.values(pages).forEach((v) => v.visible = false);
     pages[state].visible = true;
   }
 
-  function onButtonUp(event) {
+  function onButtonUp(event: number) {
     setState(2);
     it.emit('buttonUp');
   }
 
-  function onButtonDown(event) {
+  function onButtonDown(event: number) {
     setState(1);
     it.emit('buttonDown');
   }
 
-  function onButtonOver(event) {
+  function onButtonOver(event: number) {
     setState(2);
     it.emit('buttonOver');
   }
 
-  function onButtonOut(event) {
+  function onButtonOut(event: number) {
     setState(0);
     it.emit('buttonOut');
   }
 
-  function onButtonUpOutSide(event) {
+  function onButtonUpOutSide(event: number) {
     setState(0);
     it.emit('buttonUpOutSide');
   }

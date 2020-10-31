@@ -1,96 +1,70 @@
-
-import {propSatisfies, includes, propEq, map, clone} from 'ramda';
+import * as PIXI from 'pixi.js';
+import {divide} from 'mathjs';
+import {propSatisfies, includes, propEq, clone} from 'ramda';
 
 import {toPair} from '../../util';
-
 import {assign} from './assign';
-
-import {divide} from 'mathjs';
-
 import {placeHolder} from './index';
-
-import {BLEND_MODES, Texture, filters, AnimatedSprite} from 'pixi.js';
-
-const {
-  ColorMatrixFilter,
-} = filters;
-
 import {getAtlasName} from './index';
-
 import {Component} from '../override/Component';
 import {string2hex} from '../../core';
+import {MovieClipSourceElement, assertIsDefined, TextureConfig, ResourceAttributesForAtlas, MovieClipSubSourceElement} from '../../def/index';
 
-function toAnimationSpeed({
-  attributes,
-}) {
-  const {
-    interval,
-  } = attributes;
-
+function toAnimationSpeed({attributes}: MovieClipSourceElement) {
+  const {interval} = attributes;
   const ms = 16.6;
-
   return divide(ms, Number(interval));
 }
 
-function getOffsetPerFrame(source) {
+function getOffsetPerFrame(source: MovieClipSourceElement) {
   const el = source.elements[0].elements;
-
-  return map((obj) => toPair(obj.attributes.rect))(el);
+  return el.map((obj) => toPair(obj.attributes.rect));
 }
 
-function toFrames(src) {
-  let textureConfigs = temp.selectTexturesConfig(propSatisfies(includes(src), 'id'));
+function toFrames(src: string, offsets: number[][]) {
+  let textureConfigs = temp?.selectTexturesConfig(propSatisfies(includes(src), 'id'));
 
-  textureConfigs = textureConfigs.map((config) => {
-    config.index = Number(config.id.split('_')[1]);
-    return config;
-  }).sort((a, b) => a.index - b.index);
+  textureConfigs =
+    textureConfigs
+      ?.map((config) => {
+        config._index = Number(config.id.split('_')[1]);
+        return config;
+      })
+      .sort((a, b) => (a._index || 0) - (b._index || 0));
 
-  return map(toAnimationFrame)(textureConfigs);
+  return textureConfigs?.map(toAnimationFrame);
 
-  function toAnimationFrame({
-    id,
-    binIndex,
-    frame,
-  }) {
+  function toAnimationFrame({id, binIndex, frame}: TextureConfig) {
     const atlasName = getAtlasName(id, binIndex);
 
-    const {
-      file,
-    } = temp.selectResourcesConfig(propEq('id', atlasName));
+    const atlasConfig = temp?.selectResourcesConfig(propEq('id', atlasName));
+    assertIsDefined(atlasConfig);
+    const {file} = atlasConfig as ResourceAttributesForAtlas;
 
-    const {
-      baseTexture,
-    } = temp.getResource(file).texture;
+    const tex = temp?.getResource(file)?.texture;
+    assertIsDefined(tex);
 
-    return new Texture(baseTexture, frame);
+    return new PIXI.Texture(tex.baseTexture, frame);
   }
 }
 
 /*
  *  Mapping MovieClip Type to PIXI.extra.AnimatedSprite
  */
-function movieclip({
-  attributes,
-}) {
+function movieclip({attributes}: MovieClipSubSourceElement) {
   const _attr = clone(attributes);
-
-  const source = temp.getSource(_attr.src);
-
+  const _source = temp?.getSource(_attr.src);
+  assertIsDefined(_source);
+  const source = _source as MovieClipSourceElement;
   const offsets = getOffsetPerFrame(source);
-
-  const frames = toFrames(_attr.src, offsets);
-
-  const anim = new AnimatedSprite(frames);
-
+  const frames = toFrames(_attr.src, offsets) || [];
+  const anim = new PIXI.AnimatedSprite(frames);
   const maxFrame = frames.reduce((a, b) => {
     const rectA = a.width * a.height;
     const rectB = b.width * b.height;
     return rectA > rectB ? a : b;
   });
-
   const size = Math.max(maxFrame.width, maxFrame.height);
-
   const placeholder = placeHolder(size, size);
 
   const it = Component();
@@ -100,19 +74,19 @@ function movieclip({
   if (_attr.filter === 'color') {
     let [brightness, contrast, saturate, hue] = toPair(_attr.filterData);
 
-    const filter = new ColorMatrixFilter();
+    const filter = new PIXI.filters.ColorMatrixFilter();
 
     if (brightness) {
-      filter.brightness(brightness);
+      filter.brightness(brightness, false);
     }
     if (contrast) {
-      filter.contrast(contrast);
+      filter.contrast(contrast, false);
     }
     if (saturate) {
-      filter.saturate(saturate);
+      filter.saturate(saturate, false);
     }
     if (hue) {
-      filter.hue(hue * 180 - 10);
+      filter.hue(hue * 180 - 10, false);
     }
 
     it.filters = [filter];
@@ -120,11 +94,12 @@ function movieclip({
 
   //  Blend Mode
   if (_attr.blend) {
-    const blendMode = BLEND_MODES[_attr.blend.toUpperCase()];
+    const blendMode = PIXI.BLEND_MODES[_attr.blend.toUpperCase() as keyof typeof PIXI.BLEND_MODES];
 
     if (_attr.filter) {
       it.filters.forEach((filter) => filter.blendMode = blendMode);
-    } else {
+    }
+    else {
       anim.blendMode = blendMode;
     }
   }
@@ -133,31 +108,25 @@ function movieclip({
   if (_attr.color) {
     anim.tint = string2hex(_attr.color);
   }
-
   anim.animationSpeed = toAnimationSpeed(source);
-
   anim.onFrameChange = function(currentFrame) {
     const [offsetX, offsetY] = offsets[currentFrame];
-
     anim.position.set(offsetX, offsetY);
-
     anim.emit('change', currentFrame);
 
     if (currentFrame === frames.length - 1) {
       anim.emit('complete');
     }
   };
-
   anim.gotoAndStop(frames.indexOf(maxFrame));
 
   it.anim = anim;
-
   it.anim.play();
 
   //  Anchor
-  if (_attr.anchor === 'true') {
+  if (_attr.anchor === 'true' && _attr.pivot) {
     const [pivotX, pivotY] = toPair(_attr.pivot);
-    it.anchor.set(pivotX, pivotY);
+    it.anchor?.set(pivotX, pivotY);
     it.pivot.set(it.width * pivotX, it.height * pivotY);
 
     _attr.anchor = undefined;

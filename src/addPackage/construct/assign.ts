@@ -1,7 +1,8 @@
 import {toPair} from '../../util';
 import {radians} from '../../core/physic';
+import {FComponent, SourceAttributes} from '../../def/index';
 
-function assign(it, attributes) {
+function assign(it: FComponent, attributes: SourceAttributes) {
   //  Id
   it.id = attributes.id || '';
 
@@ -9,7 +10,7 @@ function assign(it, attributes) {
   it.name = attributes.name || '';
 
   //  Size
-  if (attributes.size) {
+  if (attributes.size && typeof attributes.size === 'string') {
     const [width, height] = toPair(attributes.size);
     it.width = width;
     it.height = height;
@@ -44,9 +45,9 @@ function assign(it, attributes) {
   }
 
   //  Anchor
-  if (attributes.anchor === 'true') {
+  if (attributes.anchor === 'true' && attributes.pivot) {
     const [pivotX, pivotY] = toPair(attributes.pivot);
-    it.anchor.set(pivotX, pivotY);
+    it.anchor?.set(pivotX, pivotY);
   }
 
   //  Alpha

@@ -1,46 +1,39 @@
+import * as PIXI from 'pixi.js';
+import {map, filter, has, find, prop, identity} from 'ramda';
 
 import {search, toPair} from '../../util';
-import {map, filter, has, pipe, find, prop, identity} from 'ramda';
-
 import {assign} from './assign';
-
-import {BLEND_MODES, filters, Graphics} from 'pixi.js';
 import {Component} from '../override/Component';
-
 import {transition} from './transition';
 import {construct} from './index';
 import {Button} from './button';
+import {SourceElement, FComponent, XmlElem, Transition, assertIsDefined, ComponentSourceElement, ComponentAttributes, SubComponentAttributes} from '../../def/index';
 
-const {
-  ColorMatrixFilter,
-} = filters;
-
-function subComponent(attributes) {
-  const source = temp.getSource(attributes.src);
-
-  const mapByExtension = (({
-    extention,
-  }) => extention === 'Button' ? Button(source) : identity)(source.attributes);
-
-  const comp = pipe(topComponent, mapByExtension)(source);
+function subComponent(attributes: SubComponentAttributes) {
+  const _source = temp?.getSource(attributes.src);
+  assertIsDefined(_source);
+  const source = _source as ComponentSourceElement;
+  
+  const mapByExtension = source.attributes.extention === 'Button' ? Button(source) : (it: FComponent)=>identity(it);
+  const comp = mapByExtension(topComponent(source));
 
   //  Filter
   if (attributes.filter === 'color') {
     let [brightness, contrast, saturate, hue] = toPair(attributes.filterData);
 
-    const filter = new ColorMatrixFilter();
+    const filter = new PIXI.filters.ColorMatrixFilter();
 
     if (brightness) {
-      filter.brightness(brightness);
+      filter.brightness(brightness, false);
     }
     if (contrast) {
-      filter.contrast(contrast);
+      filter.contrast(contrast, false);
     }
     if (saturate) {
-      filter.saturate(saturate);
+      filter.saturate(saturate, false);
     }
     if (hue) {
-      filter.hue(hue * 180 - 10);
+      filter.hue(hue * 180 - 10, false);
     }
 
     comp.filters = [filter];
@@ -48,11 +41,12 @@ function subComponent(attributes) {
 
   //  Blend Mode
   if (attributes.blend) {
-    const blendMode = BLEND_MODES[attributes.blend.toUpperCase()];
+    const blendMode = PIXI.BLEND_MODES[attributes.blend.toUpperCase() as keyof typeof PIXI.BLEND_MODES];
 
     if (attributes.filter) {
       comp.filters.forEach((filter) => filter.blendMode = blendMode);
-    } else {
+    }
+    else {
       comp.blendMode = blendMode;
     }
   }
@@ -60,42 +54,42 @@ function subComponent(attributes) {
   return assign(comp, attributes);
 }
 
-function topComponent(source) {
-  const comp = new Component();
+function topComponent(source: ComponentSourceElement) {
+  const comp = Component() as FComponent;
 
-  const displayElements = pipe(search(({
-    name,
-  }) => name === 'displayList'), prop('elements'), map(construct))(source);
+  const displayElements = 
+    map(construct)(
+      prop('elements')(
+        search(({name}: {name: string}) => name === 'displayList', source)[0]) as SourceElement[]);
 
-  displayElements.filter(({
-    group,
-  }) => group).forEach((element) => {
-    displayElements.find(({
-      id,
-    }) => id === element.group).list.push(element);
-  });
+  displayElements
+    .filter(({group}) => group)
+    .forEach((element) => {
+      displayElements.find(({id}) => id && element.group && id === element.group)?.list?.push(element);
+    });
 
   comp.addChild(...displayElements);
 
-  temp.getChild = (_id) => {
-    const displayList = pipe(search(({
-      name,
-    }) => name === 'displayList'), prop('elements'))(source);
+  if (temp) {
+    temp.getChild = (_id: string) => {
+      const target =
+        find(({attributes}: SourceElement) => attributes.id === _id)(
+          prop('elements')(
+            search(({name}: {name: string}) => name === 'displayList', source)[0]) as SourceElement[]);
 
-    const target = find(({
-      attributes,
-    }) => attributes.id === _id)(displayList);
+      return comp.getChildByName(target?.attributes.name || '') as PIXI.Graphics;
+    };
+  }
 
-    return comp.getChildByName(target.attributes.name);
-  };
-
-  const _transitions = pipe(search(({
-    name,
-  }) => name === 'transition'), (args) => [].concat(args), filter(has('elements')), map(transition))(source);
+  const _transitions = 
+    map(transition)(
+      filter<XmlElem>(has('elements'))(
+        ((args) => ([] as XmlElem[]).concat(args))(
+          search(({name}: {name: string}) => name === 'transition', source))) as any);
 
   if (_transitions.length > 0) {
-    comp.transition = _transitions.reduce((obj, tran) => {
-      obj[tran.name] = tran;
+    comp.transition = _transitions.reduce((obj: Transition, tran) => {
+      if (tran.name && obj[tran.name]) {obj[tran.name] = tran;}
       return obj;
     }, {});
   }
@@ -104,49 +98,42 @@ function topComponent(source) {
   it.scale.set(1, 1);
 
   if (source.attributes.mask) {
-    const mask = temp.getChild(source.attributes.mask);
+    const mask = temp?.getChild(source.attributes.mask);
     const comp = JSON.parse(JSON.stringify(it.getLocalBounds()));
 
-    if (source.attributes.reversedMask === 'true') {
-      const reversedMask = new Graphics();
-      drawReversedMask(comp, mask, reversedMask);
-
-      it.addChild(reversedMask);
-      it.mask = reversedMask;
-
-      it.updateMask = function({
-        x,
-        y,
-        width,
-        height,
-      }) {
-        if (width !== undefined) {
-          mask.x -= width - mask.width;
-          mask.width = width;
-        }
-        if (height !== undefined) {
-          mask.y -= height - mask.height;
-          mask.height = height;
-        }
-        if (x !== undefined) mask.x = x;
-        if (y !== undefined) mask.y = y;
-
+    if (mask) {
+      if (source.attributes.reversedMask === 'true') {
+        const reversedMask = new PIXI.Graphics();
         drawReversedMask(comp, mask, reversedMask);
-      };
-    } else {
-      it.mask = mask;
 
-      it.updateMask = function({
-        x,
-        y,
-        width,
-        height,
-      }) {
-        if (x !== undefined) mask.x = x;
-        if (y !== undefined) mask.y = y;
-        if (width !== undefined) mask.width = width;
-        if (height !== undefined) mask.height = height;
-      };
+        it.addChild(reversedMask);
+        it.mask = reversedMask;
+
+        it.updateMask = function({x, y, width, height}) {
+          if (width !== undefined) {
+            mask.x -= width - mask?.width;
+            mask.width = width;
+          }
+          if (height !== undefined) {
+            mask.y -= height - mask.height;
+            mask.height = height;
+          }
+          if (x !== undefined) mask.x = x;
+          if (y !== undefined) mask.y = y;
+
+          drawReversedMask(comp, mask, reversedMask);
+        };
+      }
+      else {
+        it.mask = mask;
+
+        it.updateMask = function({x, y, width, height}) {
+          if (x !== undefined) mask.x = x;
+          if (y !== undefined) mask.y = y;
+          if (width !== undefined) mask.width = width;
+          if (height !== undefined) mask.height = height;
+        };
+      }
     }
   }
 
@@ -156,13 +143,12 @@ function topComponent(source) {
 
   return it;
 
-  function hidden(attributes) {
-    const mask = new Graphics();
+  function hidden(attributes: ComponentAttributes) {
+    const mask = new PIXI.Graphics();
     mask.name = 'mask';
-
     mask.beginFill(0x000);
 
-    const [width, height] = toPair(attributes.size);
+    const [width, height] = toPair(attributes.size as string);
     const [x, y] = toPair(attributes.xy || '0,0');
 
     mask.drawRect(x, y, width, height);
@@ -172,17 +158,18 @@ function topComponent(source) {
     it.mask = mask;
 
     it._addChild = it.addChild;
-
     it.addChild = function(...args) {
-      it._addChild(...args);
+      assertIsDefined(it._addChild);
+      const ret = it._addChild(...args);
       it.setChildIndex(mask, it.children.length - 1);
+      return ret;
     };
 
     return it;
   }
 }
 
-function drawReversedMask(comp, mask, it) {
+function drawReversedMask(comp: PIXI.Container, mask: PIXI.Graphics, it: PIXI.Graphics) {
   const holeX = Math.max(0, mask.x);
   const holeY = Math.max(0, mask.y);
   const holeW = Math.min(comp.width, mask.x >= 0 ? mask.width : mask.width + mask.x);
@@ -200,12 +187,10 @@ function drawReversedMask(comp, mask, it) {
  *  1. topComponent like Scene in the Game.
  *  2. subComponent is a collection contains other elements.
  */
-export function component(source) {
-  const {
-    attributes,
-  } = source;
+export function component(source: ComponentSourceElement) {
+  const {attributes} = source;
 
-  if (attributes.src) return subComponent(attributes);
+  if (attributes.src !== undefined) return subComponent(attributes as SubComponentAttributes);
 
   return topComponent(source);
 }

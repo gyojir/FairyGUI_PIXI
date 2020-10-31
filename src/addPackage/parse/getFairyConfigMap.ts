@@ -1,15 +1,13 @@
 
 
 import {cursor, removeComment, decodeToUTF8} from '../../util';
-import {pipe} from 'ramda';
-
 import pako from 'pako';
 
 /*
  * DeCompress the ArrayBuffer To UTF-8 String
  */
 function decompressToString(buffer: ArrayBuffer) {
-  const decompressData = pako.inflate(new Uint8Array(buffer), { to: "string" });
+  const decompressData = pako.inflateRaw(new Uint8Array(buffer));
 
   return decodeToUTF8(decompressData);
 }
@@ -27,7 +25,7 @@ function tokenization(source: string) {
 
   return recursion({});
 
-  function recursion(result:  {[x : string]: string}): {[x: string]: string} {
+  function recursion(result: {[x : string]: string}): {[x: string]: string} {
     //  Read
     const key = take(find('|'));
     const size = Number(take(find('|')));
@@ -62,7 +60,7 @@ function tokenization(source: string) {
  *
  */
 function getFairyConfigMap(source: ArrayBuffer) {
-  return pipe(decompressToString, tokenization)(source);
+  return tokenization(decompressToString(source));
 }
 
 export {getFairyConfigMap};

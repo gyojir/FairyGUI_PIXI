@@ -1,14 +1,13 @@
 
-import {Text, BitmapText} from 'pixi.js';
+import * as PIXI from 'pixi.js';
+import {divide} from 'mathjs';
+import {includes} from 'ramda';
 
 import {toPair} from '../../util';
 import {assign} from './assign';
 import {placeHolder} from './index';
-
-import {divide} from 'mathjs';
-
-import {includes} from 'ramda';
 import {Component} from '../override/Component';
+import {TextSourceElement, TextAttributes, FComponent, AlignType} from '../../def/index';
 
 function style({
   fontSize,
@@ -19,7 +18,7 @@ function style({
   leading,
   letterSpacing,
   align,
-}) {
+}: TextAttributes) {
   return {
     align: align || 'left',
     fontFamily: font || 'Arial',
@@ -32,11 +31,9 @@ function style({
   };
 }
 
-function normal(attributes) {
-  const content = new Text(attributes.text, style(attributes));
-
-  const holder = placeHolder(...toPair(attributes.size));
-
+function normal(attributes: TextAttributes) {
+  const content = new PIXI.Text(attributes.text, style(attributes));
+  const holder = placeHolder(...toPair(attributes.size) as [number, number]);
   const comp = assign(Component(), attributes);
   Object.defineProperty(comp, 'text', {get: getText, set: setText});
   Object.defineProperty(comp, 'align', {get: getAlign, set: setAlign});
@@ -44,16 +41,14 @@ function normal(attributes) {
   setAlign(attributes.align);
 
   comp.addChild(holder, content);
-
   comp.content = content;
-
   return comp;
 
   function getAlign() {
     return content.style.align;
   }
 
-  function setAlign(align = 'left') {
+  function setAlign(align: AlignType = 'left') {
     content.style.align = align;
 
     if (align === 'center') content.pivot.x = content.width / 2;
@@ -69,23 +64,18 @@ function normal(attributes) {
     return content.text;
   }
 
-  function setText(text) {
+  function setText(text: string) {
     content.text = text;
     setAlign(getAlign());
   }
 }
 
-function bitMapFont(attributes) {
-  const {
-    text,
-    customData,
-  } = attributes;
-
+function bitMapFont(attributes: TextAttributes) {
+  const {text, customData} = attributes;
   const style = JSON.parse(customData);
+  const it = new PIXI.BitmapText(text, style);
 
-  const it = new BitmapText(text, style);
-
-  return assign(it, attributes);
+  return assign(it as FComponent, attributes);
 }
 
 /*
@@ -95,9 +85,7 @@ function bitMapFont(attributes) {
  *  1. Normal Text
  *  2. Custom Text Like BM_Font
  */
-function text({
-  attributes,
-}) {
+function text({attributes}: TextSourceElement) {
   if (attributes.font && includes('ui://', attributes.font)) {
     return bitMapFont(attributes);
   }

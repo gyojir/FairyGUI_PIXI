@@ -1,18 +1,23 @@
 import * as PIXI from 'pixi.js';
+import {xml2js} from 'xml-js';
+import {propEq, omit, split, toPairs, map, fromPairs} from 'ramda';
 
 import {getFairyConfigMap} from './parse/getFairyConfigMap';
 import {getTexturesConfig} from './parse/getTexturesConfig';
 import {getResourcesConfig} from './parse/getResourcesConfig';
-
 import {fnt2js} from './parse/fnt2js';
-import {xml2js} from 'xml-js';
-
 import {select} from '../util';
-
-import {pipe, propEq, omit, split, toPairs, map, fromPairs} from 'ramda';
-
-
 import {construct} from './construct';
+import {TextureConfig, SourceElement, assertIsDefined, XmlElem, ResourceAttribute} from '../def/index';
+declare global {
+  var temp: {
+    getSource: (key: string) => SourceElement;
+    selectResourcesConfig: <Pred extends (x: ResourceAttribute) => boolean>(predicate: Pred) => ResourceAttribute;
+    selectTexturesConfig: <Pred extends (x: TextureConfig) => boolean>(predicate: Pred) => TextureConfig[];
+    getResource: (name: string) => PIXI.LoaderResource;
+    getChild: (key: string) => PIXI.Graphics;
+  } | undefined;
+}
 
 /**
  *   >  Analysing Fairy Config File
@@ -38,46 +43,36 @@ import {construct} from './construct';
  * @param {string} packageName
  * @return { function(string): PIXI.Container }
  */
-function addPackage(app: PIXI.Application, packageName: string) {
+function addPackage(app: {loader: PIXI.Loader}, packageName: string) {
   //  XML Source Map contains xml source code mapping by config name.
-  const xmlSourceMap = pipe(
-    getBinaryData,
-    getFairyConfigMap
-  )(packageName);
-  // log(xmlSourceMap);
+  const xmlSourceMap = 
+    getFairyConfigMap(
+      getBinaryData(packageName));
 
   //  Resources Config contains all resources configs used by this package.
-  const resourcesConfig = pipe(
-    xml2js,
-    getResourcesConfig
-  )(xmlSourceMap['package.xml'], undefined);
-  // log(resourcesConfig);
+  const resourcesConfig = 
+    getResourcesConfig(
+      xml2js(xmlSourceMap['package.xml']) as XmlElem);
 
   //  textures Config describe how to use atlas file.
-  const texturesConfig = getTexturesConfig(
-    xmlSourceMap['sprites.bytes']
-  );
-  // log(texturesConfig);
+  const texturesConfig: TextureConfig[] =
+    getTexturesConfig(xmlSourceMap['sprites.bytes']);
 
   //  Convert other source into JavaScript object.
-  const sourceMap = pipe(
-    omit(['package.xml', 'sprites.bytes']),
-    toPairs,
-    map(bySourceType),
-    fromPairs
-  )(xmlSourceMap);
-  // log(sourceMap);
+  const sourceMap = 
+    fromPairs(
+      map(bySourceType)(
+        toPairs(
+          omit(['package.xml', 'sprites.bytes'])(xmlSourceMap))));
 
   return create;
 
-  function bySourceType([sourceKey, sourceStr]: [string, string]) {
+  function bySourceType([sourceKey, sourceStr]: [string, string]): [string, SourceElement] {
     const [key, type] = split('.', sourceKey);
     
-    const value = (
+    const value =
       (type === 'xml') ? xml2js(sourceStr).elements[0] :
-        (type === 'fnt') ? fnt2js(sourceStr) :
-          undefined
-    );
+      (type === 'fnt') ? fnt2js(sourceStr) : undefined;
 
     return [key, value];
   }
@@ -97,6 +92,7 @@ function addPackage(app: PIXI.Application, packageName: string) {
       selectResourcesConfig,
       selectTexturesConfig,
       getResource,
+      getChild: () => new PIXI.Graphics(),
     };
 
     const id = findIdBy(resName);
@@ -109,16 +105,19 @@ function addPackage(app: PIXI.Application, packageName: string) {
     return result;
   }
 
-  function getSource(key: number) {
+  function getSource(key: string) {
     return sourceMap[key];
   }
 
-  function selectResourcesConfig<Args, U>(predicate: (args: Args)=>U ) {
-    return select(predicate, resourcesConfig);
+  function selectResourcesConfig<Pred extends(x: ResourceAttribute) => boolean>(predicate: Pred) {
+    const configs = select(predicate, resourcesConfig);
+    assertIsDefined(configs[0]);
+    return configs[0];
   }
 
-  function selectTexturesConfig<Args, U>(predicate: (args: Args)=>U) {
-    return select(predicate, texturesConfig);
+  function selectTexturesConfig<Pred extends(x: TextureConfig) => boolean>(predicate: Pred) {
+    const configs = select(predicate, texturesConfig);
+    return configs;
   }
 
   function findIdBy(resName: string) {

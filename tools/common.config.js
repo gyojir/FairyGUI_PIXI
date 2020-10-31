@@ -75,7 +75,6 @@ module.exports = function(...args) {
               loader: 'babel-loader',
               options: {configFile: resolve(toolDir, 'babel.config.js')},
             },
-            {loader: 'eslint-loader'},
           ],
         },
         {

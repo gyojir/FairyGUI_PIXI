@@ -1,40 +1,37 @@
 import {randomInt} from 'mathjs';
 import {nextFrame} from '../../util';
 
-const {
-  assign,
-} = Object;
-
 export function shake({
   targets,
   duration = 0,
   amplitude = 0,
+}: {
+  targets: PIXI.DisplayObject[] | PIXI.DisplayObject,
+  duration: number,
+  amplitude: number,
 }) {
-  if (!targets.length) targets = [targets];
+  if (!Array.isArray(targets)) targets = [targets];
 
-  const range = [-1 * amplitude, amplitude];
-
+  const range: [number, number] = [-1 * amplitude, amplitude];
   const begin = new Date();
-
   const tasks = targets.map((target) => call(target));
 
   return Promise.all(tasks);
 
-  async function call(target, pos) {
+  async function call(target: PIXI.DisplayObject, pos?: {x:number, y: number}): Promise<PIXI.DisplayObject> {
     pos = pos || {x: target.x, y: target.y};
 
-    assign(target, {
+    Object.assign(target, {
       x: pos.x + randomInt(...range),
       y: pos.y + randomInt(...range),
     });
 
     await nextFrame();
-
-    return isTimeout() ? assign(target, pos) : call(target, pos);
+    return isTimeout() ? Object.assign(target, pos) : call(target, pos);
   }
 
   function isTimeout() {
     const now = new Date();
-    return now - begin > duration;
+    return now.getTime() - begin.getTime() > duration;
   }
 }

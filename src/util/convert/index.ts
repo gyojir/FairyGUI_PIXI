@@ -7,7 +7,7 @@ export function bool(source: string) {
 }
 
 export function number(source: string) {
-  if (isNaN(Number(source))) return source;
+  if (isNaN(Number(source))) return 0;
 
   return Number(source);
 }

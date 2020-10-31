@@ -1,63 +1,48 @@
-import {assign} from './assign';
-
-import {getAtlasName} from './index';
-
-import {string2hex} from '../../core/color';
-
+import * as PIXI from 'pixi.js';
 import {propEq} from 'ramda';
 
-import {Sprite, NineSlicePlane, Texture, filters, BLEND_MODES} from 'pixi.js';
+import {assign} from './assign';
+import {getAtlasName} from './index';
+import {string2hex} from '../../core/color';
 import {toPair} from '../../util/string';
+import {assertIsDefined, TextureConfig, ResourceAttributesForAtlas, ResourceAttributesFor9Grid, ImageSourceElement, FComponent} from '../../def/index';
 
-const {
-  ColorMatrixFilter,
-} = filters;
-
-function sprite({
-  id,
-  binIndex,
-  frame,
-}) {
+function sprite({id, binIndex, frame}: TextureConfig) {
   const atlasName = getAtlasName(id, binIndex);
+  const atlasConfig = temp?.selectResourcesConfig(propEq('id', atlasName)) as ResourceAttributesForAtlas | undefined;
+  assertIsDefined(atlasConfig);
+  const {file} = atlasConfig;
 
-  const {
-    file,
-  } = temp.selectResourcesConfig(propEq('id', atlasName));
+  const for9grid = temp?.selectResourcesConfig(propEq('id', id)) as ResourceAttributesFor9Grid | undefined;
+  assertIsDefined(for9grid);
+  const {_scale9grid} = for9grid;
+  
+  const tex = temp?.getResource(file).texture;
+  assertIsDefined(tex);
 
-  const {
-    scale9grid,
-  } = temp.selectResourcesConfig(propEq('id', id));
+  const texture = new PIXI.Texture(tex.baseTexture, frame);
 
-  const {
-    baseTexture,
-  } = temp.getResource(file).texture;
-
-  const texture = new Texture(baseTexture, frame);
-
-  if (scale9grid) {
-    const [a, b, c, d] = scale9grid;
-    const {
-      width,
-      height,
-    } = texture;
+  if (_scale9grid) {
+    const [a, b, c, d] = _scale9grid;
+    const {width, height} = texture;
 
     const leftWidth = a;
     const topHeight = b;
     const bottomHeight = height - (b + d);
     const rightWidth = width - (a + c);
 
-    return new NineSlicePlane(texture, leftWidth, topHeight, bottomHeight, rightWidth);
+    return new PIXI.NineSlicePlane(texture, leftWidth, topHeight, bottomHeight, rightWidth);
   }
 
-  return new Sprite(texture);
+  return new PIXI.Sprite(texture) as FComponent;
 }
 
 /*
  *  Mapping FairyGUI Image Type to PIXI.Sprite or PIXI.mesh.NineSlicePlane
  */
-function image(obj) {
-  const attributes = obj.attributes;
-  const config = temp.selectTexturesConfig(propEq('id', attributes.src));
+function image({attributes}: ImageSourceElement) {
+  const config = temp?.selectTexturesConfig(propEq('id', attributes.src))[0];
+  assertIsDefined(config);
 
   const it = assign(sprite(config), attributes);
 
@@ -68,32 +53,31 @@ function image(obj) {
   if (attributes.filter === 'color') {
     let [brightness, contrast, saturate, hue] = toPair(attributes.filterData);
 
-    const filter = new ColorMatrixFilter();
-
+    const filter = new PIXI.filters.ColorMatrixFilter();
     if (brightness) {
-      filter.brightness(brightness);
+      filter.brightness(brightness, false);
     }
     if (contrast) {
-      filter.contrast(contrast);
+      filter.contrast(contrast, false);
     }
     if (saturate) {
-      filter.saturate(saturate);
+      filter.saturate(saturate, false);
     }
     if (hue) {
       hue = hue * 180 - 10;
-      filter.hue(hue);
+      filter.hue(hue, false);
     }
-
     it.filters = [filter];
   }
 
   //  Blend Mode
   if (attributes.blend) {
-    const blendMode = BLEND_MODES[attributes.blend.toUpperCase()];
+    const blendMode = PIXI.BLEND_MODES[attributes.blend.toUpperCase() as keyof typeof PIXI.BLEND_MODES];
 
     if (attributes.filter) {
       it.filters[0].blendMode = blendMode;
-    } else {
+    }
+    else {
       it.blendMode = blendMode;
     }
   }

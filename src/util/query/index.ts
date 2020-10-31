@@ -1,16 +1,16 @@
-import {curry, filter} from 'ramda';
+import {filter} from 'ramda';
+import {XmlElem} from '../../def/index';
 
-export const select = curry(function(predicate, target) {
+export const select = function<T>(predicate: (t: T) => boolean, target: T[]) {
   const result = filter(predicate, target);
+  return result;
+};
 
-  return result.length === 1 ? result[0] : result;
-});
-
-export const search = curry(function(predicate, data) {
+export const search = function<T extends XmlElem>(predicate: (t: XmlElem) => boolean, data: T): XmlElem[] {
   const result = recursion(data);
-  return result.length === 1 ? result[0] : result;
+  return result;
 
-  function recursion(data, result = []) {
+  function recursion(data: XmlElem, result: XmlElem[] = []) {
     if (predicate(data)) {
       result.push(data);
     }
@@ -26,4 +26,4 @@ export const search = curry(function(predicate, data) {
 
     return result;
   }
-});
+};

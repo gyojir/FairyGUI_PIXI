@@ -1,37 +1,26 @@
 import {Container} from 'pixi.js';
 import {divide} from 'mathjs';
 import {Anchorable} from './Anchor';
+import {FComponent} from '../../def/index';
 
-const {
-  defineProperties,
-} = Object;
-
-export function Component() {
-  const it = new Container();
+export function Component(): FComponent {
+  const it = new Container() as FComponent;
 
   Anchorable(it);
 
-  defineProperties(it, {
+  Object.defineProperties(it, {
     height: {
       get() {
         return it.scale.y * it.getLocalBounds().height;
       },
       set(newHeight) {
         const height = it.getLocalBounds().height;
-
-        const {
-          y,
-        } = it.getBounds();
+        const {y} = it.getBounds();
 
         const value = y < 0 ? newHeight - y : newHeight;
 
-        if (height !== 0) {
-          it.scale.y = divide(value, height);
-        } else {
-          it.scale.y = 1;
-        }
-
-        it._height = newHeight;
+        it.scale.y = height !== 0 ? divide(value, height) : 1;
+        it.__height = newHeight;
       },
     },
     width: {
@@ -40,20 +29,12 @@ export function Component() {
       },
       set(newWidth) {
         const width = it.getLocalBounds().width;
-
-        const {
-          x,
-        } = it.getBounds();
+        const {x} = it.getBounds();
 
         const value = x < 0 ? newWidth - x : newWidth;
 
-        if (width !== 0) {
-          it.scale.x = divide(value, width);
-        } else {
-          it.scale.x = 1;
-        }
-
-        it._width = newWidth;
+        it.scale.x = width !== 0 ? divide(value, width) : 1;
+        it.__width = newWidth;
       },
     },
   });

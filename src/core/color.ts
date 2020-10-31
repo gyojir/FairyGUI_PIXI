@@ -1,6 +1,5 @@
 
 import {pipe, replace, slice, map} from 'ramda';
-
 import {round} from 'mathjs';
 
 const toHex = (source: string) => parseInt(source, 16);

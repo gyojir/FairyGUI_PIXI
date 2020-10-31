@@ -34,8 +34,7 @@ export function tint({
   r,
   g,
   b,
-}:
-{
+}: {
   r: number,
   g: number,
   b: number
