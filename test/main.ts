@@ -1,7 +1,7 @@
 import {Application} from 'pixi.js';
-import {addPackage} from '../src';
+import {addPackage} from '../src/index';
 
-global.log = console.log;
+(global as any).log = console.log;
 
 function main(...args) {
   const width = window.innerWidth;
@@ -34,7 +34,7 @@ function start(app) {
 
   app.stage.addChild(comp);
 
-  window.scene = comp;
+  (window as any).scene = comp;
 }
 
 //  Execute

@@ -1,4 +1,4 @@
-//  @flow
+
 
 /*
  * find(search: string): number
@@ -13,6 +13,7 @@
  * current(): number
  *   Return the current position.
  */
+
 
 /*
  * Function used to traverse source string for complex string multiplication.
@@ -30,16 +31,16 @@
  * current(): number
  *   Return the current position.
  */
-export function cursor(source, position = 0) {
-  function find(search) {
+export function cursor(source: string, position = 0) {
+  function find(search: string) {
     return source.indexOf(search, position);
   }
 
-  function takeTo(targetPosition) {
+  function takeTo(targetPosition: number) {
     return source.substring(current(), targetPosition);
   }
 
-  function moveTo(targetPosition) {
+  function moveTo(targetPosition: number) {
     position = targetPosition;
     return position;
   }

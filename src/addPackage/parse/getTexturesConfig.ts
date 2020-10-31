@@ -1,4 +1,4 @@
-// @flow
+
 
 import {split, map} from 'ramda';
 import {Rectangle} from 'pixi.js';

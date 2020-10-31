@@ -1,4 +1,4 @@
-// @flow
+import * as PIXI from 'pixi.js';
 
 import {getFairyConfigMap} from './parse/getFairyConfigMap';
 import {getTexturesConfig} from './parse/getTexturesConfig';
@@ -9,10 +9,7 @@ import {xml2js} from 'xml-js';
 
 import {select} from '../util';
 
-import {
-  pipe, propEq, omit, split,
-  toPairs, map, fromPairs,
-} from 'ramda';
+import {pipe, propEq, omit, split, toPairs, map, fromPairs} from 'ramda';
 
 
 import {construct} from './construct';
@@ -41,24 +38,25 @@ import {construct} from './construct';
  * @param {string} packageName
  * @return { function(string): PIXI.Container }
  */
-function addPackage(app, packageName) {
+function addPackage(app: PIXI.Application, packageName: string) {
   //  XML Source Map contains xml source code mapping by config name.
   const xmlSourceMap = pipe(
     getBinaryData,
-    getFairyConfigMap,
+    getFairyConfigMap
   )(packageName);
   // log(xmlSourceMap);
 
   //  Resources Config contains all resources configs used by this package.
   const resourcesConfig = pipe(
     xml2js,
-    getResourcesConfig,
-  )(xmlSourceMap['package.xml']);
+    getResourcesConfig
+  )(xmlSourceMap['package.xml'], undefined);
   // log(resourcesConfig);
 
   //  textures Config describe how to use atlas file.
-  const texturesConfig =
-    getTexturesConfig(xmlSourceMap['sprites.bytes']);
+  const texturesConfig = getTexturesConfig(
+    xmlSourceMap['sprites.bytes']
+  );
   // log(texturesConfig);
 
   //  Convert other source into JavaScript object.
@@ -66,15 +64,15 @@ function addPackage(app, packageName) {
     omit(['package.xml', 'sprites.bytes']),
     toPairs,
     map(bySourceType),
-    fromPairs,
+    fromPairs
   )(xmlSourceMap);
   // log(sourceMap);
 
   return create;
 
-  function bySourceType([sourceKey, sourceStr]) {
+  function bySourceType([sourceKey, sourceStr]: [string, string]) {
     const [key, type] = split('.', sourceKey);
-
+    
     const value = (
       (type === 'xml') ? xml2js(sourceStr).elements[0] :
         (type === 'fnt') ? fnt2js(sourceStr) :
@@ -92,7 +90,7 @@ function addPackage(app, packageName) {
    * @param {string} resName
    * @return {PIXI.Container}
    */
-  function create(resName) {
+  function create(resName: string) {
     //  Temp Global
     global.temp = {
       getSource,
@@ -111,30 +109,29 @@ function addPackage(app, packageName) {
     return result;
   }
 
-  function getSource(key) {
+  function getSource(key: number) {
     return sourceMap[key];
   }
 
-  function selectResourcesConfig(predicate) {
+  function selectResourcesConfig<Args, U>(predicate: (args: Args)=>U ) {
     return select(predicate, resourcesConfig);
   }
 
-  function selectTexturesConfig(predicate) {
+  function selectTexturesConfig<Args, U>(predicate: (args: Args)=>U) {
     return select(predicate, texturesConfig);
   }
 
-  function findIdBy(resName) {
+  function findIdBy(resName: string) {
     return selectResourcesConfig(propEq('name', resName)).id;
   }
 
-  function getResource(name) {
+  function getResource(name: string) {
     return app.loader.resources[packageName + '@' + name];
   }
 
-  function getBinaryData(packageName) {
+  function getBinaryData(packageName: string): ArrayBuffer {
     return app.loader.resources[packageName + '.fui'].data;
   }
 }
 
 export {addPackage};
-

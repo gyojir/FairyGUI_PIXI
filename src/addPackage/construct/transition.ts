@@ -1,22 +1,19 @@
-// @flow
+
 import anime from 'animejs';
-import {
-  split, mergeWith,
-  test, prop,
-} from 'ramda';
+import {split, mergeWith, test, prop} from 'ramda';
 
 import {toPair, bool} from '../../util';
 
-import {
-  position, size, alpha, rotation,
-  scale, skew, pivot, visible, tint,
-  hexToRgb, deltaTime,
-} from '../../core';
+import {position, size, alpha, rotation, scale, skew, pivot, visible, tint, hexToRgb, deltaTime} from '../../core';
 import {shake} from '../effect/shake';
 
-const {assign} = Object;
+const {
+  assign,
+} = Object;
 
-function mapByType({type}) {
+function mapByType({
+  type,
+}) {
   return {
     'XY': position,
     'Size': size,
@@ -47,7 +44,10 @@ function easing(source = 'Quad.Out') {
   return 'ease'.concat(type, func);
 }
 
-function getTarget({type, target}) {
+function getTarget({
+  type,
+  target,
+}) {
   const element = temp.getChild(target);
 
   const targets = getControlTargetByType(type);
@@ -55,13 +55,7 @@ function getTarget({type, target}) {
   return {element, targets};
 
   function getControlTargetByType(type) {
-    return (
-      (type === 'Scale') ? element.scale :
-        (type === 'Skew') ? element.skew :
-          (type === 'Pivot') ? element.pivot :
-            (type === 'Color') ? {r: 0, g: 0, b: 0} :
-              element
-    );
+    return type === 'Scale' ? element.scale : type === 'Skew' ? element.skew : type === 'Pivot' ? element.pivot : type === 'Color' ? {r: 0, g: 0, b: 0} : element;
   }
 }
 
@@ -72,11 +66,14 @@ function shouldAnimate(attributes) {
 function getFromTo(attributes) {
   const mapping = mapByType(attributes);
 
-  const {startValue, endValue} = attributes;
-  const start = mapping(...(toPair(startValue)));
+  const {
+    startValue,
+    endValue,
+  } = attributes;
+  const start = mapping(...toPair(startValue));
 
   if (!endValue) return;
-  const end = mapping(...(toPair(endValue)));
+  const end = mapping(...toPair(endValue));
 
   return mergeWith((a, b) => [a, b])(start, end);
 }
@@ -88,7 +85,10 @@ function tweenAnimation(attributes) {
 
   const byFrameRate = deltaTime(24);
 
-  const {element, targets} = getTarget(attributes);
+  const {
+    element,
+    targets,
+  } = getTarget(attributes);
 
   return Object.assign(fromTo, {
     targets,
@@ -106,13 +106,13 @@ function tweenAnimation(attributes) {
 }
 
 function keyFrame(attributes) {
-  const {targets} = getTarget(attributes);
+  const {
+    targets,
+  } = getTarget(attributes);
 
   const byFrameRate = deltaTime(24);
 
-  const time =
-    byFrameRate(attributes.time) === 0 ?
-      0 : byFrameRate(attributes.time);
+  const time = byFrameRate(attributes.time) === 0 ? 0 : byFrameRate(attributes.time);
 
   const animation = {type: 'keyFrame', time};
 
@@ -123,12 +123,9 @@ function keyFrame(attributes) {
     const transition = targets.transition[name];
 
     animation.call = () => {
-      transition.loop =
-        (loop === '-1') ? true :
-          (loop !== undefined) ? Number(loop) :
-            undefined;
+      transition.loop = loop === '-1' ? true : loop !== undefined ? Number(loop) : undefined;
 
-      (loop === '0') ? transition.pause() : transition.play();
+      loop === '0' ? transition.pause() : transition.play();
     };
     //
   } else if (attributes.type === 'Animation') {
@@ -137,10 +134,7 @@ function keyFrame(attributes) {
 
     const anim = targets.anim;
 
-    animation.call =
-      (command === 'p') ? () => anim.gotoAndPlay(Number(frame)) :
-        (command === 's') ? () => anim.gotoAndStop(Number(frame)) :
-          undefined;
+    animation.call = command === 'p' ? () => anim.gotoAndPlay(Number(frame)) : command === 's' ? () => anim.gotoAndStop(Number(frame)) : undefined;
     //
   } else if (attributes.type === 'Shake') {
     const [amplitude, seconds] = toPair(attributes.value);
@@ -151,7 +145,7 @@ function keyFrame(attributes) {
     //
     const mapping = mapByType(attributes);
 
-    const result = mapping(...(toPair(attributes.value)));
+    const result = mapping(...toPair(attributes.value));
 
     animation.call = () => assign(targets, result);
     //
@@ -173,8 +167,9 @@ function getLoop(repeat, elements) {
 
   if (repeat === '-1') return true;
 
-  const flag =
-    elements.some(({attributes}) => attributes.repeat === '-1');
+  const flag = elements.some(({
+    attributes,
+  }) => attributes.repeat === '-1');
 
   if (flag) return true;
 
@@ -182,8 +177,9 @@ function getLoop(repeat, elements) {
 }
 
 function whenYOYO(elements) {
-  const flag =
-    elements.some(({attributes}) => attributes.yoyo === 'true');
+  const flag = elements.some(({
+    attributes,
+  }) => attributes.yoyo === 'true');
 
   if (flag) return 'alternate';
 }
@@ -193,20 +189,18 @@ function whenYOYO(elements) {
  *
  *  See Anime.js
  */
-function transition({attributes, elements}) {
+function transition({
+  attributes,
+  elements,
+}) {
   let timeLine = {};
 
   const keyFrames = [];
 
   try {
-    timeLine = elements
-      .map(prop('attributes'))
-      .map(process)
-      .reduce(addTimeFrame, anime.timeline({autoplay: false}));
+    timeLine = elements.map(prop('attributes')).map(process).reduce(addTimeFrame, anime.timeline({autoplay: false}));
   } catch (e) {
-    throw new Error(
-      `Occur when create Transition: ${attributes.name}, ${e}`,
-    );
+    throw new Error(`Occur when create Transition: ${attributes.name}, ${e}`);
   }
 
   timeLine.name = attributes.name;
@@ -219,16 +213,13 @@ function transition({attributes, elements}) {
     timeLine.restart();
   }
 
-  timeLine.begin = () =>
-    keyFrames.forEach((func) => func());
+  timeLine.begin = () => keyFrames.forEach((func) => func());
 
   return timeLine;
 
   function addTimeFrame(time, frame) {
     if (frame.type === 'keyFrame') {
-      keyFrames.push(
-        () => setTimeout(frame.call, frame.time),
-      );
+      keyFrames.push(() => setTimeout(frame.call, frame.time));
     }
 
     return time.add(frame, frame.time);

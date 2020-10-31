@@ -1,4 +1,4 @@
-// @flow
+
 import {search, toPair} from '../../util';
 import {map, filter, has, pipe, find, prop, identity} from 'ramda';
 
@@ -11,13 +11,16 @@ import {transition} from './transition';
 import {construct} from './index';
 import {Button} from './button';
 
-const {ColorMatrixFilter} = filters;
+const {
+  ColorMatrixFilter,
+} = filters;
 
 function subComponent(attributes) {
   const source = temp.getSource(attributes.src);
 
-  const mapByExtension = (({extention}) =>
-    extention === 'Button' ? Button(source) : identity)(source.attributes);
+  const mapByExtension = (({
+    extention,
+  }) => extention === 'Button' ? Button(source) : identity)(source.attributes);
 
   const comp = pipe(topComponent, mapByExtension)(source);
 
@@ -48,7 +51,7 @@ function subComponent(attributes) {
     const blendMode = BLEND_MODES[attributes.blend.toUpperCase()];
 
     if (attributes.filter) {
-      comp.filters.forEach((filter) => (filter.blendMode = blendMode));
+      comp.filters.forEach((filter) => filter.blendMode = blendMode);
     } else {
       comp.blendMode = blendMode;
     }
@@ -60,37 +63,35 @@ function subComponent(attributes) {
 function topComponent(source) {
   const comp = new Component();
 
-  const displayElements = pipe(
-    search(({name}) => name === 'displayList'),
-    prop('elements'),
-    map(construct)
-  )(source);
+  const displayElements = pipe(search(({
+    name,
+  }) => name === 'displayList'), prop('elements'), map(construct))(source);
 
-  displayElements
-    .filter(({group}) => group)
-    .forEach((element) => {
-      displayElements.find(({id}) => id === element.group).list.push(element);
-    });
+  displayElements.filter(({
+    group,
+  }) => group).forEach((element) => {
+    displayElements.find(({
+      id,
+    }) => id === element.group).list.push(element);
+  });
 
   comp.addChild(...displayElements);
 
   temp.getChild = (_id) => {
-    const displayList = pipe(
-      search(({name}) => name === 'displayList'),
-      prop('elements')
-    )(source);
+    const displayList = pipe(search(({
+      name,
+    }) => name === 'displayList'), prop('elements'))(source);
 
-    const target = find(({attributes}) => attributes.id === _id)(displayList);
+    const target = find(({
+      attributes,
+    }) => attributes.id === _id)(displayList);
 
     return comp.getChildByName(target.attributes.name);
   };
 
-  const _transitions = pipe(
-    search(({name}) => name === 'transition'),
-    (args) => [].concat(args),
-    filter(has('elements')),
-    map(transition)
-  )(source);
+  const _transitions = pipe(search(({
+    name,
+  }) => name === 'transition'), (args) => [].concat(args), filter(has('elements')), map(transition))(source);
 
   if (_transitions.length > 0) {
     comp.transition = _transitions.reduce((obj, tran) => {
@@ -113,7 +114,12 @@ function topComponent(source) {
       it.addChild(reversedMask);
       it.mask = reversedMask;
 
-      it.updateMask = function({x, y, width, height}) {
+      it.updateMask = function({
+        x,
+        y,
+        width,
+        height,
+      }) {
         if (width !== undefined) {
           mask.x -= width - mask.width;
           mask.width = width;
@@ -130,7 +136,12 @@ function topComponent(source) {
     } else {
       it.mask = mask;
 
-      it.updateMask = function({x, y, width, height}) {
+      it.updateMask = function({
+        x,
+        y,
+        width,
+        height,
+      }) {
         if (x !== undefined) mask.x = x;
         if (y !== undefined) mask.y = y;
         if (width !== undefined) mask.width = width;
@@ -174,24 +185,12 @@ function topComponent(source) {
 function drawReversedMask(comp, mask, it) {
   const holeX = Math.max(0, mask.x);
   const holeY = Math.max(0, mask.y);
-  const holeW = Math.min(
-    comp.width,
-    mask.x >= 0 ? mask.width : mask.width + mask.x
-  );
-  const holeH = Math.min(
-    comp.height,
-    mask.y >= 0 ? mask.height : mask.height + mask.y
-  );
+  const holeW = Math.min(comp.width, mask.x >= 0 ? mask.width : mask.width + mask.x);
+  const holeH = Math.min(comp.height, mask.y >= 0 ? mask.height : mask.height + mask.y);
 
   it.clear();
 
-  return it
-    .beginFill(0xffff0b)
-    .drawRect(0, 0, comp.width, comp.height)
-    .beginHole()
-    .drawRect(holeX, holeY, holeW, holeH)
-    .endHole()
-    .endFill();
+  return it.beginFill(0xffff0b).drawRect(0, 0, comp.width, comp.height).beginHole().drawRect(holeX, holeY, holeW, holeH).endHole().endFill();
 }
 
 /*
@@ -202,7 +201,9 @@ function drawReversedMask(comp, mask, it) {
  *  2. subComponent is a collection contains other elements.
  */
 export function component(source) {
-  const {attributes} = source;
+  const {
+    attributes,
+  } = source;
 
   if (attributes.src) return subComponent(attributes);
 

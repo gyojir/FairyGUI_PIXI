@@ -9,5 +9,6 @@ module.exports = {
     'prefer-const': 0,
     'no-invalid-this': 0,
     'no-trailing-spaces': 0,
+    'max-len': 0
   },
 };

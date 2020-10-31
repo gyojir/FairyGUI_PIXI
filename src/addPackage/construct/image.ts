@@ -9,33 +9,44 @@ import {propEq} from 'ramda';
 import {Sprite, NineSlicePlane, Texture, filters, BLEND_MODES} from 'pixi.js';
 import {toPair} from '../../util/string';
 
-const {ColorMatrixFilter} = filters;
+const {
+  ColorMatrixFilter,
+} = filters;
 
-function sprite({id, binIndex, frame}) {
+function sprite({
+  id,
+  binIndex,
+  frame,
+}) {
   const atlasName = getAtlasName(id, binIndex);
 
-  const {file} = temp.selectResourcesConfig(propEq('id', atlasName));
+  const {
+    file,
+  } = temp.selectResourcesConfig(propEq('id', atlasName));
 
-  const {scale9grid} = temp.selectResourcesConfig(propEq('id', id));
+  const {
+    scale9grid,
+  } = temp.selectResourcesConfig(propEq('id', id));
 
-  const {baseTexture} = temp.getResource(file).texture;
+  const {
+    baseTexture,
+  } = temp.getResource(file).texture;
 
   const texture = new Texture(baseTexture, frame);
 
   if (scale9grid) {
     const [a, b, c, d] = scale9grid;
-    const {width, height} = texture;
+    const {
+      width,
+      height,
+    } = texture;
 
     const leftWidth = a;
     const topHeight = b;
     const bottomHeight = height - (b + d);
     const rightWidth = width - (a + c);
 
-    return new NineSlicePlane(
-      texture,
-      leftWidth, topHeight,
-      bottomHeight, rightWidth,
-    );
+    return new NineSlicePlane(texture, leftWidth, topHeight, bottomHeight, rightWidth);
   }
 
   return new Sprite(texture);
@@ -46,20 +57,16 @@ function sprite({id, binIndex, frame}) {
  */
 function image(obj) {
   const attributes = obj.attributes;
-  const config =
-    temp.selectTexturesConfig(propEq('id', attributes.src));
+  const config = temp.selectTexturesConfig(propEq('id', attributes.src));
 
-  const it =
-    assign(sprite(config), attributes);
+  const it = assign(sprite(config), attributes);
 
   if (attributes.color) {
     it.tint = string2hex(attributes.color);
   }
 
   if (attributes.filter === 'color') {
-    let [
-      brightness, contrast, saturate, hue,
-    ] = toPair(attributes.filterData);
+    let [brightness, contrast, saturate, hue] = toPair(attributes.filterData);
 
     const filter = new ColorMatrixFilter();
 
@@ -73,7 +80,7 @@ function image(obj) {
       filter.saturate(saturate);
     }
     if (hue) {
-      hue = (hue * 180) - 10;
+      hue = hue * 180 - 10;
       filter.hue(hue);
     }
 

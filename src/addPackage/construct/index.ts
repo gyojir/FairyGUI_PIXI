@@ -1,4 +1,4 @@
-// @flow
+
 import {component} from './component';
 import {image} from './image';
 import {movieclip} from './movieclip';
@@ -10,7 +10,9 @@ import {Graphics, ObservablePoint} from 'pixi.js';
 import {assign} from './assign';
 import {Component} from '../override/Component';
 
-const {defineProperties} = Object;
+const {
+  defineProperties,
+} = Object;
 
 /*
  *  source.name is resource type
@@ -29,7 +31,9 @@ export function construct(source) {
   return func(source);
 }
 
-function group({attributes}) {
+function group({
+  attributes,
+}) {
   const it = assign(Component(), attributes);
 
   let [x, y] = [it.x, it.y];
@@ -58,27 +62,21 @@ function group({attributes}) {
   function whenPosChange() {
     const [diffX, diffY] = [it.x - x, it.y - y];
 
-    it.list
-      .forEach((element) => {
-        element.position.x += diffX;
-        element.position.y += diffY;
-      });
+    it.list.forEach((element) => {
+      element.position.x += diffX;
+      element.position.y += diffY;
+    });
 
     [x, y] = [it.x, it.y];
   }
 
   function whenVisibleChange(flag) {
-    it.list
-      .forEach((element) => element.visible = flag);
+    it.list.forEach((element) => element.visible = flag);
   }
 }
 
 export function getAtlasName(id, binIndex) {
-  return (
-    (Number(binIndex) >= 0) ?
-      `atlas${binIndex}` :
-      `atlas_${split('_', id)[0]}`
-  );
+  return Number(binIndex) >= 0 ? `atlas${binIndex}` : `atlas_${split('_', id)[0]}`;
 }
 
 export function placeHolder(width, height) {

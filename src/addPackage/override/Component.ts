@@ -2,7 +2,9 @@ import {Container} from 'pixi.js';
 import {divide} from 'mathjs';
 import {Anchorable} from './Anchor';
 
-const {defineProperties} = Object;
+const {
+  defineProperties,
+} = Object;
 
 export function Component() {
   const it = new Container();
@@ -17,9 +19,11 @@ export function Component() {
       set(newHeight) {
         const height = it.getLocalBounds().height;
 
-        const {y} = it.getBounds();
+        const {
+          y,
+        } = it.getBounds();
 
-        const value = (y < 0) ? newHeight - y : newHeight;
+        const value = y < 0 ? newHeight - y : newHeight;
 
         if (height !== 0) {
           it.scale.y = divide(value, height);
@@ -37,9 +41,11 @@ export function Component() {
       set(newWidth) {
         const width = it.getLocalBounds().width;
 
-        const {x} = it.getBounds();
+        const {
+          x,
+        } = it.getBounds();
 
-        const value = (x < 0) ? newWidth - x : newWidth;
+        const value = x < 0 ? newWidth - x : newWidth;
 
         if (width !== 0) {
           it.scale.x = divide(value, width);

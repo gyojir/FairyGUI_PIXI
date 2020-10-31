@@ -1,15 +1,15 @@
-// @flow
+
 
 import {cursor, removeComment, decodeToUTF8} from '../../util';
 import {pipe} from 'ramda';
 
-import {Zlib} from 'zlibjs/bin/rawinflate.min';
+import pako from 'pako';
 
 /*
  * DeCompress the ArrayBuffer To UTF-8 String
  */
-function decompressToString(buffer) {
-  const decompressData = new Zlib.RawInflate(buffer).decompress();
+function decompressToString(buffer: ArrayBuffer) {
+  const decompressData = pako.inflate(new Uint8Array(buffer), { to: "string" });
 
   return decodeToUTF8(decompressData);
 }
@@ -17,12 +17,17 @@ function decompressToString(buffer) {
 /*
  * Split the huge source into a map.
  */
-function tokenization(source) {
-  const {find, takeTo, moveTo, current} = cursor(source);
+function tokenization(source: string) {
+  const {
+    find,
+    takeTo,
+    moveTo,
+    current,
+  } = cursor(source);
 
   return recursion({});
 
-  function recursion(result) {
+  function recursion(result:  {[x : string]: string}): {[x: string]: string} {
     //  Read
     const key = take(find('|'));
     const size = Number(take(find('|')));
@@ -33,10 +38,10 @@ function tokenization(source) {
 
     moveTo(current() - 1);
 
-    return (find('|') < 0) ? result : recursion(result);
+    return find('|') < 0 ? result : recursion(result);
   }
 
-  function take(targetPos) {
+  function take(targetPos: number) {
     const token = removeComment(takeTo(targetPos));
 
     moveTo(targetPos + 1);
@@ -56,11 +61,8 @@ function tokenization(source) {
  *     { key : source }
  *
  */
-function getFairyConfigMap(source) {
-  return pipe(
-      decompressToString,
-      tokenization
-  )(source);
+function getFairyConfigMap(source: ArrayBuffer) {
+  return pipe(decompressToString, tokenization)(source);
 }
 
 export {getFairyConfigMap};

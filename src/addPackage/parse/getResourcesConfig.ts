@@ -1,19 +1,16 @@
-// @flow
+
 
 import {propEq, map} from 'ramda';
 import {toPair, search} from '../../util';
 
 function processForImageType(attributes) {
-  return (
-    (scale) => (
-          (scale === '9grid') ? processFor9Grid(attributes) :
-              (scale === 'tile') ? processForTile(attributes) :
-                  attributes
-    )
-  )(attributes.scale);
+  return ((scale) => scale === '9grid' ? processFor9Grid(attributes) : scale === 'tile' ? processForTile(attributes) : attributes)(attributes.scale);
 
   function processFor9Grid(attributes) {
-    const {scale9grid, gridTile} = attributes;
+    const {
+      scale9grid,
+      gridTile,
+    } = attributes;
 
     attributes.scale9grid = toPair(scale9grid);
 
@@ -42,7 +39,10 @@ function getPackageItems(packageID, resources) {
   //
   return map(process)(resources);
 
-  function process({name, attributes}) {
+  function process({
+    name,
+    attributes,
+  }) {
     //  Attributes Condition
     if (attributes.size) {
       attributes = setWidthAndHeight(attributes);
@@ -55,12 +55,7 @@ function getPackageItems(packageID, resources) {
      *  Package Type:
      *    'image', 'swf', 'movieclip', 'sound', 'index', 'font', 'atlas', 'misc'
      */
-
-    return (
-        (attributes.type === 'image') ? processForImageType(attributes):
-            (attributes.type === 'font') ? processForFontType(attributes):
-                attributes
-    );
+    return attributes.type === 'image' ? processForImageType(attributes) : attributes.type === 'font' ? processForFontType(attributes) : attributes;
   }
 
   function processForFontType(source) {
@@ -75,8 +70,9 @@ function getPackageItems(packageID, resources) {
 export function getResourcesConfig(json) {
   const packageID = json.elements[0].attributes.id;
 
-  const {elements} = search(propEq('name', 'resources'), json);
+  const {
+    elements,
+  } = search(propEq('name', 'resources'), json);
 
   return getPackageItems(packageID, elements);
 }
-

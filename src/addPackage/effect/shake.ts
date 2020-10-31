@@ -1,9 +1,15 @@
 import {randomInt} from 'mathjs';
 import {nextFrame} from '../../util';
 
-const {assign} = Object;
+const {
+  assign,
+} = Object;
 
-export function shake({targets, duration = 0, amplitude = 0}) {
+export function shake({
+  targets,
+  duration = 0,
+  amplitude = 0,
+}) {
   if (!targets.length) targets = [targets];
 
   const range = [-1 * amplitude, amplitude];
@@ -24,12 +30,11 @@ export function shake({targets, duration = 0, amplitude = 0}) {
 
     await nextFrame();
 
-    return isTimeout() ?
-      assign(target, pos) : call(target, pos);
+    return isTimeout() ? assign(target, pos) : call(target, pos);
   }
 
   function isTimeout() {
     const now = new Date();
-    return (now - begin) > duration;
+    return now - begin > duration;
   }
 }

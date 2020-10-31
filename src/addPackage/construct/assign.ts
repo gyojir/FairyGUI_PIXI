@@ -3,10 +3,10 @@ import {radians} from '../../core/physic';
 
 function assign(it, attributes) {
   //  Id
-  it.id = (attributes.id) || '';
+  it.id = attributes.id || '';
 
   //  Name
-  it.name = (attributes.name) || '';
+  it.name = attributes.name || '';
 
   //  Size
   if (attributes.size) {

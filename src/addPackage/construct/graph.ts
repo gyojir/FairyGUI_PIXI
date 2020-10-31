@@ -22,7 +22,10 @@ function preprocess(attributes) {
   return {func, lineSize, lineColor, fillColor, size};
 }
 
-function mapFuncBy({type, corner}) {
+function mapFuncBy({
+  type,
+  corner,
+}) {
   if (type === 'eclipse') return 'drawEllipse';
 
   if (type === 'rect') {
@@ -41,27 +44,33 @@ function rectangle(size) {
 
 function ellipse(size) {
   const [w, h] = toPair(size);
-  const x = (w / 2);
-  const y = (h / 2);
-  const width = (w / 2);
-  const height = (h / 2);
+  const x = w / 2;
+  const y = h / 2;
+  const width = w / 2;
+  const height = h / 2;
 
   return [x, y, width, height];
 }
 
-function mapSizeBy(func, {size, corner}) {
+function mapSizeBy(func, {
+  size,
+  corner,
+}) {
   if (func === 'drawEllipse') return ellipse(size);
 
   if (func === 'drawRect') return rectangle(size);
   if (func === 'drawRoundedRect') {
-    return [
-      ...rectangle(size),
-      Number(corner),
-    ];
+    return [...rectangle(size), Number(corner)];
   }
 }
 
-function setGraphics({func, lineSize, lineColor, fillColor, size}) {
+function setGraphics({
+  func,
+  lineSize,
+  lineColor,
+  fillColor,
+  size,
+}) {
   const it = new Graphics();
 
   const lineAlpha = (lineColor >>> 24) / 0xFF;
@@ -80,12 +89,10 @@ function setGraphics({func, lineSize, lineColor, fillColor, size}) {
 /*
  *  Mapping graph to PIXI.Graphics
  */
-function graph({attributes}) {
-  const graphics = (
-    (attributes.type) ?
-      pipe(preprocess, setGraphics)(attributes) :
-      new Graphics()
-  );
+function graph({
+  attributes,
+}) {
+  const graphics = attributes.type ? pipe(preprocess, setGraphics)(attributes) : new Graphics();
 
   Anchorable(graphics);
 

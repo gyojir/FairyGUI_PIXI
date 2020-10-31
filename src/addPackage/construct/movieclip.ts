@@ -1,8 +1,5 @@
-// @flow
-import {
-  propSatisfies, includes, propEq, map,
-  clone,
-} from 'ramda';
+
+import {propSatisfies, includes, propEq, map, clone} from 'ramda';
 
 import {toPair} from '../../util';
 
@@ -12,20 +9,23 @@ import {divide} from 'mathjs';
 
 import {placeHolder} from './index';
 
-import {
-  BLEND_MODES, Texture, filters,
-  AnimatedSprite,
-} from 'pixi.js';
+import {BLEND_MODES, Texture, filters, AnimatedSprite} from 'pixi.js';
 
-const {ColorMatrixFilter} = filters;
+const {
+  ColorMatrixFilter,
+} = filters;
 
 import {getAtlasName} from './index';
 
 import {Component} from '../override/Component';
 import {string2hex} from '../../core';
 
-function toAnimationSpeed({attributes}) {
-  const {interval} = attributes;
+function toAnimationSpeed({
+  attributes,
+}) {
+  const {
+    interval,
+  } = attributes;
 
   const ms = 16.6;
 
@@ -39,24 +39,29 @@ function getOffsetPerFrame(source) {
 }
 
 function toFrames(src) {
-  let textureConfigs =
-    temp.selectTexturesConfig(propSatisfies(includes(src), 'id'));
+  let textureConfigs = temp.selectTexturesConfig(propSatisfies(includes(src), 'id'));
 
-  textureConfigs =
-    textureConfigs.map((config) => {
-      config.index = Number(config.id.split('_')[1]);
-      return config;
-    })
-      .sort((a, b) => a.index - b.index);
+  textureConfigs = textureConfigs.map((config) => {
+    config.index = Number(config.id.split('_')[1]);
+    return config;
+  }).sort((a, b) => a.index - b.index);
 
   return map(toAnimationFrame)(textureConfigs);
 
-  function toAnimationFrame({id, binIndex, frame}) {
+  function toAnimationFrame({
+    id,
+    binIndex,
+    frame,
+  }) {
     const atlasName = getAtlasName(id, binIndex);
 
-    const {file} = temp.selectResourcesConfig(propEq('id', atlasName));
+    const {
+      file,
+    } = temp.selectResourcesConfig(propEq('id', atlasName));
 
-    const {baseTexture} = temp.getResource(file).texture;
+    const {
+      baseTexture,
+    } = temp.getResource(file).texture;
 
     return new Texture(baseTexture, frame);
   }
@@ -65,7 +70,9 @@ function toFrames(src) {
 /*
  *  Mapping MovieClip Type to PIXI.extra.AnimatedSprite
  */
-function movieclip({attributes}) {
+function movieclip({
+  attributes,
+}) {
   const _attr = clone(attributes);
 
   const source = temp.getSource(_attr.src);
@@ -91,9 +98,7 @@ function movieclip({attributes}) {
 
   //  Filter
   if (_attr.filter === 'color') {
-    let [
-      brightness, contrast, saturate, hue,
-    ] = toPair(_attr.filterData);
+    let [brightness, contrast, saturate, hue] = toPair(_attr.filterData);
 
     const filter = new ColorMatrixFilter();
 
@@ -107,7 +112,7 @@ function movieclip({attributes}) {
       filter.saturate(saturate);
     }
     if (hue) {
-      filter.hue((hue * 180) - 10);
+      filter.hue(hue * 180 - 10);
     }
 
     it.filters = [filter];
@@ -118,8 +123,7 @@ function movieclip({attributes}) {
     const blendMode = BLEND_MODES[_attr.blend.toUpperCase()];
 
     if (_attr.filter) {
-      it.filters
-        .forEach((filter) => filter.blendMode = blendMode);
+      it.filters.forEach((filter) => filter.blendMode = blendMode);
     } else {
       anim.blendMode = blendMode;
     }

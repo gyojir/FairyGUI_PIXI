@@ -1,7 +1,5 @@
-// @flow
-import {
-  Text, BitmapText,
-} from 'pixi.js';
+
+import {Text, BitmapText} from 'pixi.js';
 
 import {toPair} from '../../util';
 import {assign} from './assign';
@@ -12,26 +10,32 @@ import {divide} from 'mathjs';
 import {includes} from 'ramda';
 import {Component} from '../override/Component';
 
-function style(
-  {fontSize, font, bold, italic, color, leading, letterSpacing, align},
-) {
+function style({
+  fontSize,
+  font,
+  bold,
+  italic,
+  color,
+  leading,
+  letterSpacing,
+  align,
+}) {
   return {
-    align: (align) || 'left',
-    fontFamily: (font) || 'Arial',
+    align: align || 'left',
+    fontFamily: font || 'Arial',
     fontSize: Number(fontSize),
-    fontStyle: (italic) ? 'italic' : 'normal',
-    fontWeight: (bold) ? 'bold' : 'normal',
-    fill: (color) ? [color] : ['#000000'],
-    leading: (leading) ? Number(leading) : 0,
-    letterSpacing: (letterSpacing) ? Number(letterSpacing) : 0,
+    fontStyle: italic ? 'italic' : 'normal',
+    fontWeight: bold ? 'bold' : 'normal',
+    fill: color ? [color] : ['#000000'],
+    leading: leading ? Number(leading) : 0,
+    letterSpacing: letterSpacing ? Number(letterSpacing) : 0,
   };
 }
 
 function normal(attributes) {
   const content = new Text(attributes.text, style(attributes));
 
-  const holder =
-    placeHolder(...toPair(attributes.size));
+  const holder = placeHolder(...toPair(attributes.size));
 
   const comp = assign(Component(), attributes);
   Object.defineProperty(comp, 'text', {get: getText, set: setText});
@@ -72,7 +76,10 @@ function normal(attributes) {
 }
 
 function bitMapFont(attributes) {
-  const {text, customData} = attributes;
+  const {
+    text,
+    customData,
+  } = attributes;
 
   const style = JSON.parse(customData);
 
@@ -88,7 +95,9 @@ function bitMapFont(attributes) {
  *  1. Normal Text
  *  2. Custom Text Like BM_Font
  */
-function text({attributes}) {
+function text({
+  attributes,
+}) {
   if (attributes.font && includes('ui://', attributes.font)) {
     return bitMapFont(attributes);
   }

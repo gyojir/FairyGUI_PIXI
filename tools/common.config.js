@@ -21,7 +21,10 @@ const {
 module.exports = function(...args) {
   return {
     //  Entry   ===========================================
-    entry: resolve(testDir, 'main.js'),
+    entry: resolve(testDir, 'main.ts'),
+    resolve: {
+      extensions: [".js", ".json", ".ts"],
+    },
 
     //  Output  ===========================================
     output: {
@@ -61,7 +64,7 @@ module.exports = function(...args) {
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.ts$/,
           include: [
             sourceDir,
             testDir,
