@@ -1,10 +1,9 @@
 import * as PIXI from 'pixi.js';
 import {propEq} from 'ramda';
 
-import {assign} from './assign';
+import {assign, createFilter, assignBlendMode} from './common';
 import {getAtlasName} from './index';
 import {string2hex} from '../../core/color';
-import {toPair} from '../../util/string';
 import {assertIsDefined, TextureConfig, ResourceAttributesForAtlas, ResourceAttributesFor9Grid, ImageSourceElement, FComponent} from '../../def/index';
 
 function sprite({id, binIndex, frame}: TextureConfig) {
@@ -40,7 +39,7 @@ function sprite({id, binIndex, frame}: TextureConfig) {
 /*
  *  Mapping FairyGUI Image Type to PIXI.Sprite or PIXI.mesh.NineSlicePlane
  */
-function image({attributes}: ImageSourceElement) {
+function image({attributes}: ImageSourceElement): FComponent {
   const config = temp?.selectTexturesConfig(propEq('id', attributes.src))[0];
   assertIsDefined(config);
 
@@ -49,38 +48,14 @@ function image({attributes}: ImageSourceElement) {
   if (attributes.color) {
     it.tint = string2hex(attributes.color);
   }
-
-  if (attributes.filter === 'color') {
-    let [brightness, contrast, saturate, hue] = toPair(attributes.filterData);
-
-    const filter = new PIXI.filters.ColorMatrixFilter();
-    if (brightness) {
-      filter.brightness(brightness, false);
-    }
-    if (contrast) {
-      filter.contrast(contrast, false);
-    }
-    if (saturate) {
-      filter.saturate(saturate, false);
-    }
-    if (hue) {
-      hue = hue * 180 - 10;
-      filter.hue(hue, false);
-    }
+  
+  const filter = createFilter(attributes);
+  if (filter) {
     it.filters = [filter];
   }
-
+  
   //  Blend Mode
-  if (attributes.blend) {
-    const blendMode = PIXI.BLEND_MODES[attributes.blend.toUpperCase() as keyof typeof PIXI.BLEND_MODES];
-
-    if (attributes.filter) {
-      it.filters[0].blendMode = blendMode;
-    }
-    else {
-      it.blendMode = blendMode;
-    }
-  }
+  assignBlendMode(it, it.filters, attributes);
 
   return it;
 }

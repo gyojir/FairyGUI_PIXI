@@ -2,7 +2,7 @@ import {Graphics} from 'pixi.js';
 
 import {toPair} from '../../util';
 import {string2hex} from '../../core';
-import {assign} from './assign';
+import {assign} from './common';
 import {Anchorable} from '../override/Anchor';
 import {FComponent, GraphAttributes, GraphSourceElement} from '../../def/index';
 

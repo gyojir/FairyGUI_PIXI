@@ -4,7 +4,7 @@ import {divide} from 'mathjs';
 import {includes} from 'ramda';
 
 import {toPair} from '../../util';
-import {assign} from './assign';
+import {assign} from './common';
 import {placeHolder} from './index';
 import {Component} from '../override/Component';
 import {TextSourceElement, TextAttributes, FComponent, AlignType} from '../../def/index';

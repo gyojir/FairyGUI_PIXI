@@ -1,8 +1,9 @@
+import * as PIXI from 'pixi.js';
 import {toPair} from '../../util';
 import {radians} from '../../core/physic';
 import {FComponent, SourceAttributes} from '../../def/index';
 
-function assign(it: FComponent, attributes: SourceAttributes) {
+export function assign(it: FComponent, attributes: SourceAttributes): FComponent {
   //  Id
   it.id = attributes.id || '';
 
@@ -10,7 +11,7 @@ function assign(it: FComponent, attributes: SourceAttributes) {
   it.name = attributes.name || '';
 
   //  Size
-  if (attributes.size && typeof attributes.size === 'string') {
+  if (attributes.size) {
     const [width, height] = toPair(attributes.size);
     it.width = width;
     it.height = height;
@@ -71,4 +72,42 @@ function assign(it: FComponent, attributes: SourceAttributes) {
   return it;
 }
 
-export {assign};
+export function assignBlendMode(comp: FComponent, filters: PIXI.Filter[] | undefined, attributes: SourceAttributes): void {
+  //  Blend Mode
+  if (attributes.blend) {
+    const blendMode = PIXI.BLEND_MODES[attributes.blend.toUpperCase() as keyof typeof PIXI.BLEND_MODES];
+
+    if (attributes.filter) {
+      filters?.forEach((filter) => filter.blendMode = blendMode);
+    }
+    else {
+      comp.blendMode = blendMode;
+    }
+  }
+}
+
+export function createFilter(attributes: SourceAttributes): PIXI.Filter | undefined {
+  //  Filter
+  if (attributes.filter === 'color' && attributes.filterData) {
+    let [brightness, contrast, saturate, hue] = toPair(attributes.filterData);
+
+    const filter = new PIXI.filters.ColorMatrixFilter();
+
+    if (brightness) {
+      filter.brightness(brightness, false);
+    }
+    if (contrast) {
+      filter.contrast(contrast, false);
+    }
+    if (saturate) {
+      filter.saturate(saturate, false);
+    }
+    if (hue) {
+      filter.hue(hue * 180 - 10, false);
+    }
+
+    return filter;
+  }
+
+  return undefined;
+}

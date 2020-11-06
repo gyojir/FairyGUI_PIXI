@@ -6,7 +6,7 @@ import {image} from './image';
 import {movieclip} from './movieclip';
 import {graph} from './graph';
 import {text} from './text';
-import {assign} from './assign';
+import {assign} from './common';
 import {Component} from '../override/Component';
 import {SourceElement} from '../../def/index';
 
@@ -31,11 +31,8 @@ function group({attributes}: SourceElement) {
   const it = assign(Component(), attributes);
 
   let [x, y] = [it.x, it.y];
-
   it.position = new ObservablePoint(whenPosChange, it, x, y);
-
   it.list = [];
-
   let visible = it.visible;
 
   Object.defineProperties(it, {

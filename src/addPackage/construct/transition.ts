@@ -13,7 +13,7 @@ type TimeFrameObject = {
   time?: number
 };
 
-function mapByType({type}: {type: string}) {
+function mapByType({type}: {type: string}): (...args:any[])=>any {
   return (
     type === 'XY' ? position :
     type === 'Size' ? size :
@@ -63,7 +63,7 @@ function shouldAnimate(attributes: TransitionAnimeAttributes) {
 }
 
 function getFromTo(attributes: TweenAnimeAttributes) {
-  const mapping = mapByType(attributes) as Function;
+  const mapping = mapByType(attributes);
   const {startValue, endValue} = attributes;
   
   const start = mapping(...toPair(startValue));
@@ -127,7 +127,7 @@ function keyFrame(attributes: KeyFrameAnimeAttributes): TimeFrameObject {
     }
   }
   else {
-    const mapping = mapByType({type: attributes.type}) as Function;
+    const mapping = mapByType({type: attributes.type});
     const result = mapping(...toPair(attributes.value));
     animation.call = () => Object.assign(targets, result);
   }
@@ -164,9 +164,9 @@ function whenYOYO(elements: PickType<TransitionSourceElement, 'elements'>) {
  *
  *  See Anime.js
  */
-function transition({attributes, elements}: TransitionSourceElement) {
+function transition({attributes, elements}: TransitionSourceElement): ExtendedAnimeInstance {
   let timeLine: ExtendedAnimeInstance | undefined;
-  const keyFrames: Function[] = [];
+  const keyFrames: (()=>void)[] = [];
 
   try {
     timeLine =

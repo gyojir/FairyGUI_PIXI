@@ -3,7 +3,7 @@ import {divide} from 'mathjs';
 import {propSatisfies, includes, propEq, clone} from 'ramda';
 
 import {toPair} from '../../util';
-import {assign} from './assign';
+import {assign, createFilter, assignBlendMode} from './common';
 import {placeHolder} from './index';
 import {getAtlasName} from './index';
 import {Component} from '../override/Component';
@@ -56,6 +56,7 @@ function movieclip({attributes}: MovieClipSubSourceElement) {
   const _source = temp?.getSource(_attr.src);
   assertIsDefined(_source);
   const source = _source as MovieClipSourceElement;
+  
   const offsets = getOffsetPerFrame(source);
   const frames = toFrames(_attr.src, offsets) || [];
   const anim = new PIXI.AnimatedSprite(frames);
@@ -71,38 +72,13 @@ function movieclip({attributes}: MovieClipSubSourceElement) {
   it.addChild(placeholder, anim);
 
   //  Filter
-  if (_attr.filter === 'color') {
-    let [brightness, contrast, saturate, hue] = toPair(_attr.filterData);
-
-    const filter = new PIXI.filters.ColorMatrixFilter();
-
-    if (brightness) {
-      filter.brightness(brightness, false);
-    }
-    if (contrast) {
-      filter.contrast(contrast, false);
-    }
-    if (saturate) {
-      filter.saturate(saturate, false);
-    }
-    if (hue) {
-      filter.hue(hue * 180 - 10, false);
-    }
-
+  const filter = createFilter(attributes);
+  if(filter){
     it.filters = [filter];
   }
 
   //  Blend Mode
-  if (_attr.blend) {
-    const blendMode = PIXI.BLEND_MODES[_attr.blend.toUpperCase() as keyof typeof PIXI.BLEND_MODES];
-
-    if (_attr.filter) {
-      it.filters.forEach((filter) => filter.blendMode = blendMode);
-    }
-    else {
-      anim.blendMode = blendMode;
-    }
-  }
+  assignBlendMode(anim, it.filters, attributes);
 
   //  Color
   if (_attr.color) {

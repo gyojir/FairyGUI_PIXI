@@ -34,7 +34,6 @@ export interface ResourceAttributesForAtlas extends ResourceAttribute {
 
 export interface SourceAttributes {
   name: string;
-  // type: string;
   id: string;
 
   // use in assign
@@ -49,10 +48,9 @@ export interface SourceAttributes {
   visible?: 'true' | 'false';
   group?: string;
 
-  filter: string;
-  filterData: string;
-  blend: keyof typeof PIXI.BLEND_MODES;
-
+  filter?: string;
+  filterData?: string;
+  blend?: keyof typeof PIXI.BLEND_MODES;
 }
 
 export interface ComponentAttributes extends SourceAttributes{
@@ -199,21 +197,21 @@ export interface Transition {
 }
 
 export interface FComponent extends PIXI.Container{
-  id?: string;
-  
-  // width: number | { get: () => number; set: (x: number) => void; }
-  // height: number | { get: () => number; set: (x: number) => void; }
-  
+  id?: string;  
   __width?: number;
   __height?: number;
+  blendMode?: PIXI.BLEND_MODES;
+  transition?: Transition;
+  tint: number;
+  anim?: PIXI.AnimatedSprite;
+  content?: PIXI.DisplayObject; // text
+  group?: string;
   
   anchor?: {
     x: number;
     y: number;
     set: (newX: number, newY: number) => void
   };
-
-  group?: string;
 
   list?: {
     visible: boolean;
@@ -222,20 +220,8 @@ export interface FComponent extends PIXI.Container{
       y: number;
     };
   }[];
-  
-  blendMode?: PIXI.BLEND_MODES;
-
-  transition?: Transition;
 
   updateMask?: (rect: { x?: number, y?: number, width?: number, height?: number }) => void;
-
-  _addChild?: PickType<PIXI.Container, 'addChild'>;
-
-  tint: number;
-
-  anim?: PIXI.AnimatedSprite;
-
-  content?: PIXI.DisplayObject;
 }
 
 export type AlignType = 'right' | 'left' | 'center';
