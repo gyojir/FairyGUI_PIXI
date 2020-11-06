@@ -193,7 +193,7 @@ export interface TextSourceElement extends SourceElement{
 }
 
 export interface Transition {
-  [x: string]: any;
+  [x: string]: ExtendedAnimeInstance;
 }
 
 export interface FComponent extends PIXI.Container{

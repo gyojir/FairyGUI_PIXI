@@ -71,7 +71,7 @@ function topComponent(source: ComponentSourceElement) {
 
   if (_transitions.length > 0) {
     it.transition = _transitions.reduce((obj: Transition, tran) => {
-      if (tran.name && obj[tran.name]) {obj[tran.name] = tran;}
+      if (tran.name) {obj[tran.name] = tran;}
       return obj;
     }, {});
   }
