@@ -1,15 +1,27 @@
-export interface ResourceElement{
+import * as PIXI from 'pixi.js';
+export type Context = {
+  getRootSource: (key: string) => SourceMapElement | FontSourceMapElement;
+  selectResourcesConfig: <Pred extends (x: ResourceAttribute) => boolean>(predicate: Pred) => ResourceAttribute;
+  selectTextureAtlasConfig: <Pred extends (x: TextureAtlasConfig) => boolean>(predicate: Pred) => TextureAtlasConfig[];
+  getResource: (name: string) => PIXI.LoaderResource;
+  getChild: (key: string) => PIXI.Graphics;
+};
+
+export interface ResourceElement {
   name: 'image' | 'swf' | 'movieclip' | 'sound' | 'index' | 'font' | 'atlas' | 'misc';
   attributes: ResourceAttribute;
 }
 
-export interface ResourceAttribute{
+export interface ResourceAttribute {
   id: string;
   name: string;
   size: string;
   scale: '9grid' | 'tile';
+  path: string;
+  exported?: boolean;
 
   // after process
+  _rawId: string;
   _type: PickType<ResourceElement, 'name'>;
   _size: {width: number, height: number};
 }
@@ -30,6 +42,11 @@ export interface ResourceAttributesForTile extends ResourceAttribute {
 
 export interface ResourceAttributesForAtlas extends ResourceAttribute {
   file: string;
+}
+
+export interface ResourceAttributesFont extends ResourceAttribute {
+  fontTexture: string;    // font resource id
+  texture: string;        // font resource id
 }
 
 export interface SourceAttributes {
@@ -69,7 +86,7 @@ export interface SubComponentAttributes extends SourceAttributes{
 
 export interface ImageAttributes extends SourceAttributes{
   src: string;
-  color: string;
+  color?: string;
   size: string;
 }
 
@@ -148,29 +165,25 @@ export interface XmlElem {
   elements: XmlElem[];
 }
 
-export type TextureConfig = {
-  id: string;
-  binIndex: string;
-  frame: PIXI.Rectangle;
-  _index?: number;
-};
-
-export interface SourceElement extends XmlElem{
-  id: string;
+/**
+ * XML element of sourceMap
+ */
+export interface SourceMapElement extends XmlElem{
+  // id: string;
   name: 'image' | 'movieclip' | 'graph' | 'text' | 'component' | 'group';
   attributes: SourceAttributes;
 }
 
-export interface ComponentSourceElement extends SourceElement{
+export interface ComponentSourceMapElement extends SourceMapElement{
   attributes: ComponentAttributes;
 }
-export interface ImageSourceElement extends SourceElement{
+export interface ImageSourceMapElement extends SourceMapElement{
   attributes: ImageAttributes;
 }
-export interface GraphSourceElement extends SourceElement{
+export interface GraphSourceMapElement extends SourceMapElement{
   attributes: GraphAttributes;
 }
-export interface TransitionSourceElement extends SourceElement{
+export interface TransitionSourceMapElement extends SourceMapElement{
   attributes: TransitionAttributes;
   elements: {
     name: string;
@@ -182,15 +195,28 @@ export interface TransitionSourceElement extends SourceElement{
     elements: XmlElem[];
   }[];
 }
-export interface MovieClipSourceElement extends SourceElement{
+// Root MovieClip Element
+export interface MovieClipSourceMapElement extends SourceMapElement{
   attributes: MovieClipAttributes;
 }
-export interface MovieClipSubSourceElement extends SourceElement{
+// Sub MovieClip Element
+export interface MovieClipSubSourceMapElement extends SourceMapElement{
   attributes: MovieClipSubAttributes;
 }
-export interface TextSourceElement extends SourceElement{
+export interface TextSourceMapElement extends SourceMapElement{
   attributes: TextAttributes;
 }
+
+export interface FontSourceMapElement {
+  data: PIXI.BitmapFontData;
+}
+
+export type TextureAtlasConfig = {
+  id: string;
+  atlasIndex: string;    // {packageName}@atlas{atlasIndex}.png
+  rect: PIXI.Rectangle;  // texture rect
+}
+
 
 export interface Transition {
   [x: string]: ExtendedAnimeInstance;

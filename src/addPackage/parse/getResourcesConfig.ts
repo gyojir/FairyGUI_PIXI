@@ -37,12 +37,15 @@ function setWidthAndHeight(attributes: ResourceAttribute) {
   return attributes;
 }
 
-function getPackageItems(packageID: string, resources: ResourceElement[]) {
+function getResourceAttributes(resources: ResourceElement[], packageID: string): ResourceAttribute[] {
   return resources.map(({name, attributes}) => {
     //  Attributes Condition
     if (attributes.size) {
       attributes = setWidthAndHeight(attributes);
     }
+
+    // original id
+    attributes._rawId = attributes.id;
 
     //  Type Condition
     attributes._type = name;
@@ -59,9 +62,9 @@ function getPackageItems(packageID: string, resources: ResourceElement[]) {
 /*
  * Return all resources config used by this package.
  */
-export function getResourcesConfig(json: XmlElem) {
+export function getResourcesConfig(json: XmlElem): ResourceAttribute[] {
   const packageID: string = json.elements[0].attributes.id;
   const {elements} = search(propEq('name', 'resources'), json)[0];
 
-  return getPackageItems(packageID, elements as ResourceElement[]);
+  return getResourceAttributes(elements as ResourceElement[], packageID);
 }

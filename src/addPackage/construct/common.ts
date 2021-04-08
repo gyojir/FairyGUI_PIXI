@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import {toPair} from '../../util';
 import {radians} from '../../core/physic';
 import {FComponent, SourceAttributes} from '../../def/index';
+import {split} from 'ramda';
 
 export function assign(it: FComponent, attributes: SourceAttributes): FComponent {
   //  Id
@@ -110,4 +111,8 @@ export function createFilter(attributes: SourceAttributes): PIXI.Filter | undefi
   }
 
   return undefined;
+}
+
+export function getAtlasName(id: string, atlasIndex: string) {
+  return Number(atlasIndex) >= 0 ? `atlas${atlasIndex}` : `atlas_${split('_', id)[0]}`;
 }

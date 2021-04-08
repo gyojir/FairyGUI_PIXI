@@ -7,15 +7,14 @@ import {Component} from '../override/Component';
 import {transition} from './transition';
 import {construct} from './index';
 import {Button} from './button';
-import {SourceElement, FComponent, XmlElem, Transition, assertIsDefined, ComponentSourceElement, SubComponentAttributes} from '../../def/index';
+import {SourceMapElement, FComponent, XmlElem, Transition, assertIsDefined, ComponentSourceMapElement, SubComponentAttributes, Context, TransitionSourceMapElement} from '../../def/index';
 
-function subComponent(attributes: SubComponentAttributes) {
-  const _source = temp?.getSource(attributes.src);
-  assertIsDefined(_source);
-  const source = _source as ComponentSourceElement;
+function subComponent(context: Context, attributes: SubComponentAttributes) {
+  const source = context.getRootSource(attributes.src) as ComponentSourceMapElement;
+  assertIsDefined(source);
   
   const mapByExtension = source.attributes.extention === 'Button' ? Button(source) : (it: FComponent)=>identity(it);
-  const comp = mapByExtension(topComponent(source));
+  const comp = mapByExtension(topComponent(context, source));
 
   //  Filter
   const filter = createFilter(attributes);
@@ -29,7 +28,7 @@ function subComponent(attributes: SubComponentAttributes) {
   return assign(comp, attributes);
 }
 
-function topComponent(source: ComponentSourceElement) {
+function topComponent(context: Context, source: ComponentSourceMapElement) {
   const comp = Component() as FComponent;
   
   const it = assign(comp, source.attributes);
@@ -37,9 +36,9 @@ function topComponent(source: ComponentSourceElement) {
 
   // construct child
   const displayElements = 
-    map(construct)(
+    map((e: SourceMapElement) => construct(context, e))(
       prop('elements')(
-        search(({name}: {name: string}) => name === 'displayList', source)[0]) as SourceElement[]);
+        search(({name}: {name: string}) => name === 'displayList', source)[0]) as SourceMapElement[]);
 
   // assign group
   displayElements
@@ -51,20 +50,18 @@ function topComponent(source: ComponentSourceElement) {
   it.addChild(...displayElements);
 
   // used in transition
-  if (temp) {
-    temp.getChild = (_id: string) => {
-      const target =
-        find(({attributes}: SourceElement) => attributes.id === _id)(
-          prop('elements')(
-            search(({name}: {name: string}) => name === 'displayList', source)[0]) as SourceElement[]);
+  context.getChild = (_id: string) => {
+    const target =
+      find(({attributes}: SourceMapElement) => attributes.id === _id)(
+        prop('elements')(
+          search(({name}: {name: string}) => name === 'displayList', source)[0]) as SourceMapElement[]);
 
-      return it.getChildByName(target?.attributes.name || '') as PIXI.Graphics;
-    };
-  }
+    return it.getChildByName(target?.attributes.name || '') as PIXI.Graphics;
+  };
 
   // transition
   const _transitions = 
-    map(transition)(
+    map((e: TransitionSourceMapElement)=>transition(context, e))(
       filter<XmlElem>(has('elements'))(
         ((args) => ([] as XmlElem[]).concat(args))(
           search(({name}: {name: string}) => name === 'transition', source))) as any);
@@ -78,7 +75,7 @@ function topComponent(source: ComponentSourceElement) {
 
   // mask
   if (source.attributes.mask) {
-    const mask = temp?.getChild(source.attributes.mask);
+    const mask = context.getChild(source.attributes.mask);
     const comp = JSON.parse(JSON.stringify(it.getLocalBounds()));
 
     if (mask) {
@@ -158,10 +155,10 @@ function drawReversedMask(comp: PIXI.Container, mask: PIXI.Graphics, it: PIXI.Gr
  *  1. topComponent like Scene in the Game.
  *  2. subComponent is a collection contains other elements.
  */
-export function component(source: ComponentSourceElement): FComponent {
+export function component(context: Context, source: ComponentSourceMapElement): FComponent {
   const {attributes} = source;
 
-  if (attributes.src !== undefined) return subComponent(attributes as SubComponentAttributes);
+  if (attributes.src !== undefined) return subComponent(context, attributes as SubComponentAttributes);
 
-  return topComponent(source);
+  return topComponent(context, source);
 }

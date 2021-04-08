@@ -7,7 +7,7 @@ import {toPair} from '../../util';
 import {assign} from './common';
 import {placeHolder} from './index';
 import {Component} from '../override/Component';
-import {TextSourceElement, TextAttributes, FComponent, AlignType} from '../../def/index';
+import {TextSourceMapElement, TextAttributes, FComponent, AlignType, Context} from '../../def/index';
 
 function style({
   fontSize,
@@ -71,9 +71,10 @@ function normal(attributes: TextAttributes) {
 }
 
 function bitMapFont(attributes: TextAttributes) {
-  const {text, customData} = attributes;
-  const style = JSON.parse(customData);
-  const it = new PIXI.BitmapText(text, style);
+  const {text, font} = attributes;
+  const it = new PIXI.BitmapText(text, {
+    fontName: font || "",
+  });
 
   return assign(it as FComponent, attributes);
 }
@@ -85,7 +86,7 @@ function bitMapFont(attributes: TextAttributes) {
  *  1. Normal Text
  *  2. Custom Text Like BM_Font
  */
-function text({attributes}: TextSourceElement) {
+function text(context: Context, {attributes}: TextSourceMapElement) {
   if (attributes.font && includes('ui://', attributes.font)) {
     return bitMapFont(attributes);
   }

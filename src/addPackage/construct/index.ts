@@ -1,5 +1,4 @@
 import {Graphics, ObservablePoint} from 'pixi.js';
-import {split} from 'ramda';
 
 import {component} from './component';
 import {image} from './image';
@@ -8,13 +7,13 @@ import {graph} from './graph';
 import {text} from './text';
 import {assign} from './common';
 import {Component} from '../override/Component';
-import {SourceElement} from '../../def/index';
+import {SourceMapElement, Context} from '../../def/index';
 
 /*
  *  source.name is resource type
  *  switch construct function by type
  */
-export function construct(source: SourceElement) {
+export function construct(context: Context, source: SourceMapElement) {
   const func = {
     image, movieclip, graph, text, component, group,
   }[source.name];
@@ -24,10 +23,10 @@ export function construct(source: SourceElement) {
     throw Error('This resource type not support.');
   }
 
-  return func(source as any);
+  return func(context, source as any);
 }
 
-function group({attributes}: SourceElement) {
+function group(context: Context, {attributes}: SourceMapElement) {
   const it = assign(Component(), attributes);
 
   let [x, y] = [it.x, it.y];
@@ -63,10 +62,6 @@ function group({attributes}: SourceElement) {
   function whenVisibleChange(flag: boolean) {
     it.list?.forEach((element) => element.visible = flag);
   }
-}
-
-export function getAtlasName(id: string, binIndex: string) {
-  return Number(binIndex) >= 0 ? `atlas${binIndex}` : `atlas_${split('_', id)[0]}`;
 }
 
 export function placeHolder(width: number, height: number) {

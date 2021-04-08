@@ -4,7 +4,7 @@ import {toPair} from '../../util';
 import {string2hex} from '../../core';
 import {assign} from './common';
 import {Anchorable} from '../override/Anchor';
-import {FComponent, GraphAttributes, GraphSourceElement} from '../../def/index';
+import {FComponent, GraphAttributes, GraphSourceMapElement, Context} from '../../def/index';
 
 function preprocess(attributes: GraphAttributes) {
   const lineSize = attributes.lineSize ? Number(attributes.lineSize) : 1;
@@ -88,7 +88,7 @@ function setGraphics({
 /*
  *  Mapping graph to PIXI.Graphics
  */
-function graph({attributes}: GraphSourceElement) {
+function graph(context: Context, {attributes}: GraphSourceMapElement) {
   const graphics: FComponent =
     attributes.type ? setGraphics(preprocess(attributes)) : new Graphics();
 

@@ -8,17 +8,8 @@ import {getResourcesConfig} from './parse/getResourcesConfig';
 import {fnt2js} from './parse/fnt2js';
 import {select} from '../util';
 import {construct} from './construct';
-import {TextureConfig, SourceElement, assertIsDefined, XmlElem, ResourceAttribute} from '../def/index';
-
-declare global {
-  var temp: {
-    getSource: (key: string) => SourceElement;
-    selectResourcesConfig: <Pred extends (x: ResourceAttribute) => boolean>(predicate: Pred) => ResourceAttribute;
-    selectTexturesConfig: <Pred extends (x: TextureConfig) => boolean>(predicate: Pred) => TextureConfig[];
-    getResource: (name: string) => PIXI.LoaderResource;
-    getChild: (key: string) => PIXI.Graphics;
-  } | undefined;
-}
+import {TextureAtlasConfig as TextureAtlasConfig, SourceMapElement, assertIsDefined, XmlElem, ResourceAttribute, ResourceAttributesFont, Context, FontSourceMapElement} from '../def/index';
+import {sprite} from './construct/image';
 
 /**
  *   >  Analysing Fairy Config File
@@ -45,35 +36,61 @@ declare global {
  * @return { function(string): PIXI.Container }
  */
 function addPackage(app: {loader: PIXI.Loader}, packageName: string) {
+  //  Temp Global
+  let context: Context = {
+    getRootSource,
+    selectResourcesConfig,
+    selectTextureAtlasConfig,
+    getResource,
+    getChild: () => new PIXI.Graphics(),
+  };
+
   //  XML Source Map contains xml source code mapping by config name.
   const xmlSourceMap = 
     getFairyConfigMap(
       getBinaryData(packageName));
 
   //  Resources Config contains all resources configs used by this package.
-  const resourcesConfig = 
-    getResourcesConfig(
-      xml2js(xmlSourceMap['package.xml']) as XmlElem);
+  const packageXml = xml2js(xmlSourceMap['package.xml']) as XmlElem;
+  const resourcesConfig = getResourcesConfig(packageXml);
 
   //  textures Config describe how to use atlas file.
-  const texturesConfig: TextureConfig[] =
+  const textureAtlasConfig: TextureAtlasConfig[] =
     getTexturesConfig(xmlSourceMap['sprites.bytes']);
 
-  //  Convert other source into JavaScript object.
+  //  Convert other source (compenents, fonts) into JavaScript object.
   const sourceMap = 
     fromPairs(
       map(bySourceType)(
         toPairs(
           omit(['package.xml', 'sprites.bytes'])(xmlSourceMap))));
 
+  // install BitMapFont
+  select(propEq('_type', "font"), resourcesConfig).map(e=>{
+    const fontAttribute = e as ResourceAttributesFont;
+    const font = sourceMap[fontAttribute._rawId] as FontSourceMapElement;
+    const info = font.data.info[0] || {face: ""};
+    info.face = 'ui://' + fontAttribute.id; // overwrite font name
+
+    if(fontAttribute.texture){
+      const fontTexture = sprite(context, fontAttribute.texture);
+      PIXI.BitmapFont.install(font.data, fontTexture.texture);
+    }
+    else {
+      const textures = font.data.page.map(e=> sprite(context, e.file).texture);
+      PIXI.BitmapFont.install(font.data, textures);
+    }
+  });
+
+
   return create;
 
-  function bySourceType([sourceKey, sourceStr]: [string, string]): [string, SourceElement] {
+  function bySourceType([sourceKey, sourceStr]: [string, string]): [string, SourceMapElement | FontSourceMapElement] {
     const [key, type] = split('.', sourceKey);
     
     const value =
       (type === 'xml') ? xml2js(sourceStr).elements[0] :
-      (type === 'fnt') ? fnt2js(sourceStr) : undefined;
+      (type === 'fnt') ? fnt2js(context, sourceStr) : undefined;
 
     return [key, value];
   }
@@ -87,26 +104,16 @@ function addPackage(app: {loader: PIXI.Loader}, packageName: string) {
    * @return {PIXI.Container}
    */
   function create(resName: string) {
-    //  Temp Global
-    global.temp = {
-      getSource,
-      selectResourcesConfig,
-      selectTexturesConfig,
-      getResource,
-      getChild: () => new PIXI.Graphics(),
-    };
 
     const id = findIdBy(resName);
-    const result = construct(sourceMap[id]);
-
-    delete global.temp;
+    const result = construct(context, sourceMap[id] as SourceMapElement);
 
     result.name = resName;
 
     return result;
   }
 
-  function getSource(key: string) {
+  function getRootSource(key: string) {
     return sourceMap[key];
   }
 
@@ -116,8 +123,8 @@ function addPackage(app: {loader: PIXI.Loader}, packageName: string) {
     return configs[0];
   }
 
-  function selectTexturesConfig<Pred extends(x: TextureConfig) => boolean>(predicate: Pred) {
-    const configs = select(predicate, texturesConfig);
+  function selectTextureAtlasConfig<Pred extends(x: TextureAtlasConfig) => boolean>(predicate: Pred) {
+    const configs = select(predicate, textureAtlasConfig);
     return configs;
   }
 

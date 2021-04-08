@@ -1,8 +1,8 @@
 import {map, curry, reduce, find, mergeAll} from 'ramda';
 import {toPair, search} from '../../util';
-import {SourceElement, FComponent, XmlElem} from '../../def/index';
+import {SourceMapElement, FComponent, XmlElem} from '../../def/index';
 
-export const Button = curry(function(source: SourceElement, it: FComponent) {
+export const Button = curry(function(source: SourceMapElement, it: FComponent) {
   it.interactive = true;
   it.buttonMode = true;
 
