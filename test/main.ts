@@ -3,7 +3,7 @@ import {addPackage} from '../src/index';
 
 (global as any).log = console.log;
 
-function main(...args) {
+function main() {
   const width = window.innerWidth;
   const height = window.innerHeight;
   const app = new Application({width, height});
@@ -12,7 +12,7 @@ function main(...args) {
   load(app).then(start);
 }
 
-function load(app) {
+function load(app: Application) {
   app.loader.baseUrl = 'assets';
   app.loader
     .add('test@atlas0.png')
@@ -20,21 +20,22 @@ function load(app) {
 
   return new Promise(onLoaded);
 
-  function onLoaded(resolve) {
+  function onLoaded(resolve: (app: Application)=>void) {
     app.loader.load(() => resolve(app));
   }
 }
 
-function start(app) {
+function start(app: Application) {
   const create = addPackage(app, 'test');
   const comp = create('Test');
-
-  comp.width = app.screen.width;
-  comp.height = app.screen.height;
-
+  const text = <PIXI.BitmapText>(comp.getChildByName("n4"));
   app.stage.addChild(comp);
 
-  (window as any).scene = comp;
+  const input = window.document.createElement("textarea");
+  window.document.body.appendChild(input);
+  input.oninput = (e: Event) => {
+    text.text = input.value;
+  }
 }
 
 //  Execute

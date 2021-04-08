@@ -9,8 +9,9 @@
     "build-dts": "tsc",
     "build": "npm run clean && npm run build-dts && cross-env NODE_ENV=production npm run webpack -- --env.mode=production",
     "watch": "npm run clean && cross-env NODE_ENV=development npm run webpack -- --env.mode=development --watch",
-    "dev-server": "webpack-dev-server --config ./tools/build.js --host 0.0.0.0",
+    "dev-server": "webpack-dev-server --config ./tools/build.js --host 127.0.0.1",
     "start": "npm run clean && cross-env NODE_ENV=development npm run dev-server -- --env.mode=development --open",
+    "start:test": "npm run clean && cross-env NODE_ENV=development npm run dev-server -- --env.mode=test --open",
     "prepare": "npm run build"
   },
   "main": "dist/fairyGUI_PIXI.js",

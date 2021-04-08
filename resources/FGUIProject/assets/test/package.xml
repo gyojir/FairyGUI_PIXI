@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<packageDescription id="cijf2vuw">
+  <resources>
+    <component id="aanj0" name="Test.xml" path="/" exported="true"/>
+    <image id="s57fb" name="a.png" path="/Folder/"/>
+    <image id="s57fc" name="b.png" path="/Folder/"/>
+    <font id="f89h1r" name="Font1.fnt" path="/" exported="true" texture="f89h21"/>
+    <image id="f89h21" name="mybitmapfont_0.png" path="/"/>
+    <font id="gi8622" name="Font2.fnt" path="/" exported="true"/>
+  </resources>
+  <publish name="" path="..\..\assets" packageCount="2"/>
+</packageDescription>

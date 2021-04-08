@@ -36,9 +36,7 @@ module.exports = function(...args) {
       rules: [
         {
           test: /\.ts$/,
-          include: [
-            sourceDir,
-          ],
+          exclude: /node_modules/,
           sideEffects: false,
           use: [
             {

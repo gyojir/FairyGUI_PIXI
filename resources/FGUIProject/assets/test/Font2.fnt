@@ -1,0 +1,4 @@
+info size=32 colored=false
+common xadvance=32
+char id=97 img=s57fb xoffset=0 yoffset=0 xadvance=0
+char id=98 img=s57fc xoffset=0 yoffset=0 xadvance=0
