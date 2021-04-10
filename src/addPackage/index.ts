@@ -8,7 +8,7 @@ import {getResourcesConfig} from './parse/getResourcesConfig';
 import {fnt2js} from './parse/fnt2js';
 import {select} from '../util';
 import {construct} from './construct';
-import {TextureAtlasConfig as TextureAtlasConfig, SourceMapElement, assertIsDefined, XmlElem, ResourceAttribute, ResourceAttributesFont, Context, FontSourceMapElement} from '../def/index';
+import {TextureAtlasConfig, SourceMapElement, assertIsDefined, XmlElem, ResourceAttribute, ResourceAttributesFont, Context, FontSourceMapElement} from '../def/index';
 import {sprite} from './construct/image';
 
 /**

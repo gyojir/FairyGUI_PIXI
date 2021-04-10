@@ -8,8 +8,10 @@ import {assign} from './common';
 import {placeHolder} from './index';
 import {Component} from '../override/Component';
 import {TextSourceMapElement, TextAttributes, FComponent, AlignType, Context} from '../../def/index';
+import {string2hex} from '../../core/color';
 
-function style({
+function normal({
+  text,
   fontSize,
   font,
   bold,
@@ -19,7 +21,7 @@ function style({
   letterSpacing,
   align,
 }: TextAttributes) {
-  return {
+  const content = new PIXI.Text(text, {
     align: align || 'left',
     fontFamily: font || 'Arial',
     fontSize: Number(fontSize),
@@ -28,28 +30,62 @@ function style({
     fill: color ? [color] : ['#000000'],
     leading: leading ? Number(leading) : 0,
     letterSpacing: letterSpacing ? Number(letterSpacing) : 0,
-  };
+  });
+  return content;
 }
 
-function normal(attributes: TextAttributes) {
-  const content = new PIXI.Text(attributes.text, style(attributes));
+function bitMapFont({
+  text,
+  font,
+  color,
+  align
+}: TextAttributes) {
+  const content = new PIXI.BitmapText(text, {
+    fontName: font || "",
+    align: align || 'left',
+    tint: color ? string2hex(color) : 0xFFFFFF
+  });
+  return content;
+
+}
+
+/*
+ *  Mapping text to PIXI.text or Container
+ *
+ *  There are two kinds of Text:
+ *  1. Normal Text
+ *  2. Custom Text Like BM_Font
+ */
+function text(context: Context, {attributes}: TextSourceMapElement): FComponent {
+  let content : PIXI.Text | PIXI.BitmapText;
+  if (attributes.font && includes('ui://', attributes.font)) {
+    content = bitMapFont(attributes);
+  }
+  else {
+    content = normal(attributes);
+  }
+  
   const holder = placeHolder(...toPair(attributes.size) as [number, number]);
   const comp = assign(Component(), attributes);
   Object.defineProperty(comp, 'text', {get: getText, set: setText});
   Object.defineProperty(comp, 'align', {get: getAlign, set: setAlign});
-
   setAlign(attributes.align);
 
   comp.addChild(holder, content);
   comp.content = content;
-  return comp;
+  return comp
 
   function getAlign() {
-    return content.style.align;
+    return content instanceof PIXI.Text ? content.style.align : content.align as AlignType;
   }
 
   function setAlign(align: AlignType = 'left') {
-    content.style.align = align;
+    if(content instanceof PIXI.Text) {
+      content.style.align = align;
+    }
+    else {
+      content.align = align;
+    }
 
     if (align === 'center') content.pivot.x = content.width / 2;
 
@@ -68,30 +104,6 @@ function normal(attributes: TextAttributes) {
     content.text = text;
     setAlign(getAlign());
   }
-}
-
-function bitMapFont(attributes: TextAttributes) {
-  const {text, font} = attributes;
-  const it = new PIXI.BitmapText(text, {
-    fontName: font || "",
-  });
-
-  return assign(it as FComponent, attributes);
-}
-
-/*
- *  Mapping text to PIXI.text or Container
- *
- *  There are two kinds of Text:
- *  1. Normal Text
- *  2. Custom Text Like BM_Font
- */
-function text(context: Context, {attributes}: TextSourceMapElement) {
-  if (attributes.font && includes('ui://', attributes.font)) {
-    return bitMapFont(attributes);
-  }
-
-  return normal(attributes);
 }
 
 export {text};
