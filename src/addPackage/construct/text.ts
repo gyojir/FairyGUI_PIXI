@@ -21,7 +21,7 @@ function normal({
   letterSpacing,
   align,
 }: TextAttributes) {
-  const content = new PIXI.Text(text, {
+  const content = new PIXI.Text(text || "", {
     align: align || 'left',
     fontFamily: font || 'Arial',
     fontSize: Number(fontSize),
@@ -40,7 +40,7 @@ function bitMapFont({
   color,
   align
 }: TextAttributes) {
-  const content = new PIXI.BitmapText(text, {
+  const content = new PIXI.BitmapText(text || "", {
     fontName: font || "",
     align: align || 'left',
     tint: color ? string2hex(color) : 0xFFFFFF
