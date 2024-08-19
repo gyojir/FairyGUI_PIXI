@@ -19,7 +19,7 @@ export function Component(): FComponent {
 
         const value = y < 0 ? newHeight - y : newHeight;
 
-        it.scale.y = height !== 0 ? divide(value, height) : 1;
+        it.scale.y = height !== 0 ? Number(divide(value, height)) : 1;
         it.__height = newHeight;
       },
     },
@@ -33,7 +33,7 @@ export function Component(): FComponent {
 
         const value = x < 0 ? newWidth - x : newWidth;
 
-        it.scale.x = width !== 0 ? divide(value, width) : 1;
+        it.scale.x = width !== 0 ? Number(divide(value, width)) : 1;
         it.__width = newWidth;
       },
     },
