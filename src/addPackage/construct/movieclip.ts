@@ -33,7 +33,7 @@ function toFrames(context: Context, src: string, offsets: number[][]) {
 
   function toAnimationFrame({id, atlasIndex, rect}: TextureAtlasConfig) {
     const atlasName = getAtlasName(id, atlasIndex);
-    const atlasConfig = context.selectResourcesConfig(propEq('id', atlasName)) as ResourceAttributesForAtlas;;
+    const atlasConfig = context.selectResourcesConfig(propEq('id', atlasName)) as ResourceAttributesForAtlas;
     assertIsDefined(atlasConfig);
     const texRes = context.getResource(atlasConfig.file)?.texture;
     assertIsDefined(texRes);
@@ -46,7 +46,7 @@ function toFrames(context: Context, src: string, offsets: number[][]) {
  *  Mapping MovieClip Type to PIXI.extra.AnimatedSprite
  */
 function movieclipById(context: Context, src: string) {
-  const source = context.getRootSource(src) as MovieClipSourceMapElement;;
+  const source = context.getRootSource(src) as MovieClipSourceMapElement;
   assertIsDefined(source);
   
   const offsets = getOffsetPerFrame(source);
@@ -88,7 +88,7 @@ function movieclip(context: Context, {attributes}: MovieClipSubSourceMapElement)
 
   //  Filter
   const filter = createFilter(attributes);
-  if(filter){
+  if (filter) {
     it.filters = [filter];
   }
 

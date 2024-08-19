@@ -66,18 +66,18 @@ function addPackage(app: {loader: PIXI.Loader}, packageName: string) {
           omit(['package.xml', 'sprites.bytes'])(xmlSourceMap))));
 
   // install BitMapFont
-  select(propEq('_type', "font"), resourcesConfig).map(e=>{
+  select(propEq('_type', 'font'), resourcesConfig).map((e)=>{
     const fontAttribute = e as ResourceAttributesFont;
     const font = sourceMap[fontAttribute._rawId] as FontSourceMapElement;
-    const info = font.data.info[0] || {face: ""};
+    const info = font.data.info[0] || {face: ''};
     info.face = 'ui://' + fontAttribute.id; // overwrite font name
 
-    if(fontAttribute.texture){
+    if (fontAttribute.texture) {
       const fontTexture = sprite(context, fontAttribute.texture);
       PIXI.BitmapFont.install(font.data, fontTexture.texture);
     }
     else {
-      const textures = font.data.page.map(e=> sprite(context, e.file).texture);
+      const textures = font.data.page.map((e)=> sprite(context, e.file).texture);
       PIXI.BitmapFont.install(font.data, textures);
     }
   });
@@ -104,7 +104,6 @@ function addPackage(app: {loader: PIXI.Loader}, packageName: string) {
    * @return {PIXI.Container}
    */
   function create(resName: string) {
-
     const id = findIdBy(resName);
     const result = construct(context, sourceMap[id] as SourceMapElement);
 

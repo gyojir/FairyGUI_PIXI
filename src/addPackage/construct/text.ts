@@ -21,7 +21,7 @@ function normal({
   letterSpacing,
   align,
 }: TextAttributes) {
-  const content = new PIXI.Text(text || "", {
+  const content = new PIXI.Text(text || '', {
     align: align || 'left',
     fontFamily: font || 'Arial',
     fontSize: Number(fontSize),
@@ -38,15 +38,14 @@ function bitMapFont({
   text,
   font,
   color,
-  align
+  align,
 }: TextAttributes) {
-  const content = new PIXI.BitmapText(text || "", {
-    fontName: font || "",
+  const content = new PIXI.BitmapText(text || '', {
+    fontName: font || '',
     align: align || 'left',
-    tint: color ? string2hex(color) : 0xFFFFFF
+    tint: color ? string2hex(color) : 0xFFFFFF,
   });
   return content;
-
 }
 
 /*
@@ -73,14 +72,14 @@ function text(context: Context, {attributes}: TextSourceMapElement): FComponent 
 
   comp.addChild(holder, content);
   comp.content = content;
-  return comp
+  return comp;
 
   function getAlign() {
     return content instanceof PIXI.Text ? content.style.align : content.align as AlignType;
   }
 
   function setAlign(align: AlignType = 'left') {
-    if(content instanceof PIXI.Text) {
+    if (content instanceof PIXI.Text) {
       content.style.align = align;
     }
     else {
