@@ -61,10 +61,10 @@ function topComponent(context: Context, source: ComponentSourceMapElement) {
 
   // transition
   const _transitions = 
-    map((e: TransitionSourceMapElement)=>transition(context, e))(
-      filter<XmlElem>(has('elements'))(
-        ((args) => ([] as XmlElem[]).concat(args))(
-          search(({name}: {name: string}) => name === 'transition', source))) as any);
+    map((e: SourceMapElement)=>transition(context, e as TransitionSourceMapElement))(
+      filter<SourceMapElement>(has('elements'))(
+        ((args) => Array<SourceMapElement>().concat(args))(
+          search(({name}: {name: string}) => name === 'transition', source))));
 
   if (_transitions.length > 0) {
     it.transition = _transitions.reduce((obj: Transition, tran) => {

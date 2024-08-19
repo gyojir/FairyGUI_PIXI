@@ -75,7 +75,7 @@ export function fnt2js(context: Context, source: string): FontSourceMapElement {
         char.xadvance = char.xadvance === 0 && common.length > 0 ? common[0].xadvance : char.xadvance;
 
         if (e.img !== undefined) {
-          const atlasConfs = context.selectTextureAtlasConfig(propEq('id', e.img));
+          const atlasConfs = context.selectTextureAtlasConfig(propEq(e.img, 'id'));
           if (atlasConfs.length > 0) {
             const rect = atlasConfs[0].rect;
             char.width = rect.width;

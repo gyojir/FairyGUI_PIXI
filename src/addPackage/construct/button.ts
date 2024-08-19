@@ -2,7 +2,7 @@ import {map, curry, reduce, find, mergeAll} from 'ramda';
 import {toPair, search} from '../../util';
 import {SourceMapElement, FComponent, XmlElem} from '../../def/index';
 
-export const Button = curry(function(source: SourceMapElement, it: FComponent) {
+export const Button = (source: SourceMapElement) => (it: FComponent) => {
   it.interactive = true;
   it.buttonMode = true;
 
@@ -25,7 +25,7 @@ export const Button = curry(function(source: SourceMapElement, it: FComponent) {
 
   function getImage({attributes, elements}: XmlElem) {
     const image = it.getChildByName(attributes.name);
-    const indexes = toPair(find(({name}) => name === 'gearDisplay', elements)?.attributes.pages);
+    const indexes = toPair(find(({name}: {name: string}) => name === 'gearDisplay', elements)?.attributes.pages);
 
     return reduce<number, {[x: number]: PIXI.DisplayObject}>((pages, index) => {
       pages[index] = image;
@@ -62,4 +62,4 @@ export const Button = curry(function(source: SourceMapElement, it: FComponent) {
     setState(0);
     it.emit('buttonUpOutSide');
   }
-});
+};

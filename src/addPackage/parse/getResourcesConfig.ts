@@ -64,7 +64,7 @@ function getResourceAttributes(resources: ResourceElement[], packageID: string):
  */
 export function getResourcesConfig(json: XmlElem): ResourceAttribute[] {
   const packageID: string = json.elements[0].attributes.id;
-  const {elements} = search(propEq('name', 'resources'), json)[0];
+  const {elements} = search(propEq('resources', 'name'), json)[0];
 
   return getResourceAttributes(elements as ResourceElement[], packageID);
 }

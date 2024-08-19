@@ -6,11 +6,11 @@ export const select = function<T>(predicate: (t: T) => boolean, target: T[]) {
   return result;
 };
 
-export const search = function<T extends XmlElem>(predicate: (t: XmlElem) => boolean, data: T): XmlElem[] {
+export const search = function<T extends XmlElem>(predicate: (t: XmlElem) => boolean, data: T): T[] {
   const result = recursion(data);
   return result;
 
-  function recursion(data: XmlElem, result: XmlElem[] = []) {
+  function recursion<T extends XmlElem>(data: T, result: T[] = []) {
     if (predicate(data)) {
       result.push(data);
     }

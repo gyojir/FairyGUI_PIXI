@@ -21,7 +21,7 @@ export function hexToRgb(source: string) {
 }
 
 export function rgbToHex(r: number, g: number, b: number) {
-  [r, g, b] = map(round, [r, g, b]);
+  [r, g, b] = map<number, number>(round, [r, g, b]);
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 

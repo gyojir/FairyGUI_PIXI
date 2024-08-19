@@ -33,7 +33,7 @@ function toFrames(context: Context, src: string, offsets: number[][]) {
 
   function toAnimationFrame({id, atlasIndex, rect}: TextureAtlasConfig) {
     const atlasName = getAtlasName(id, atlasIndex);
-    const atlasConfig = context.selectResourcesConfig(propEq('id', atlasName)) as ResourceAttributesForAtlas;
+    const atlasConfig = context.selectResourcesConfig(propEq(atlasName, 'id')) as ResourceAttributesForAtlas;
     assertIsDefined(atlasConfig);
     const texRes = context.getResource(atlasConfig.file)?.texture;
     assertIsDefined(texRes);

@@ -63,11 +63,11 @@ function addPackage(app: {loader: PIXI.Loader}, packageName: string) {
     fromPairs(
       map(bySourceType)(
         toPairs(
-          omit(['package.xml', 'sprites.bytes'])(xmlSourceMap))));
+          omit(['package.xml', 'sprites.bytes'])(xmlSourceMap)) as [string,string][]));
 
   // install BitMapFont
-  select(propEq('_type', 'font'), resourcesConfig).map((e)=>{
-    const fontAttribute = e as ResourceAttributesFont;
+  select(propEq('font', '_type'), resourcesConfig).map((e)=>{
+    const fontAttribute = e as unknown as ResourceAttributesFont;
     const font = sourceMap[fontAttribute._rawId] as FontSourceMapElement;
     const info = font.data.info[0] || {face: ''};
     info.face = 'ui://' + fontAttribute.id; // overwrite font name
@@ -128,7 +128,7 @@ function addPackage(app: {loader: PIXI.Loader}, packageName: string) {
   }
 
   function findIdBy(resName: string) {
-    return selectResourcesConfig(propEq('name', resName)).id;
+    return selectResourcesConfig(propEq(resName, 'name')).id;
   }
 
   function getResource(name: string) {
