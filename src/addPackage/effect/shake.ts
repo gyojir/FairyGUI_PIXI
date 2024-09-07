@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js';
 import {randomInt} from 'mathjs';
 import {nextFrame} from '../../util';
 

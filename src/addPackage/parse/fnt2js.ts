@@ -61,7 +61,7 @@ export function fnt2js(context: Context, source: string): FontSourceMapElement {
       .map(([, ...source]: string[]) => chunkToJSON(source))
       .map((e) => {
         const char = {
-          id: e.id,
+          id: Number(e.id || 0),
           page: Number(e.page || 0),
           img: String(e.img || ''),
           x: Number(e.x || 0),

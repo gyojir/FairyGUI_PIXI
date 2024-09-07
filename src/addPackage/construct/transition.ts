@@ -1,4 +1,5 @@
 
+import * as PIXI from 'pixi.js';
 import anime from 'animejs';
 import {split, mergeWith, test, prop} from 'ramda';
 

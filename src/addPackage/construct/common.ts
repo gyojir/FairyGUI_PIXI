@@ -73,7 +73,7 @@ export function assign(it: FComponent, attributes: SourceAttributes): FComponent
   return it;
 }
 
-export function assignBlendMode(comp: FComponent, filters: PIXI.Filter[] | undefined, attributes: SourceAttributes): void {
+export function assignBlendMode(comp: FComponent, filters: PIXI.Filter[] | null, attributes: SourceAttributes): void {
   //  Blend Mode
   if (attributes.blend) {
     const blendMode = PIXI.BLEND_MODES[attributes.blend.toUpperCase() as keyof typeof PIXI.BLEND_MODES];

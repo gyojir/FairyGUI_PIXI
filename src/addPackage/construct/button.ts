@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js';
 import {map, curry, reduce, find, mergeAll} from 'ramda';
 import {toPair, search} from '../../util';
 import {SourceMapElement, FComponent, XmlElem} from '../../def/index';

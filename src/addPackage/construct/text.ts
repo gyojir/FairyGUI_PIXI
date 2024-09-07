@@ -75,10 +75,10 @@ function text(context: Context, {attributes}: TextSourceMapElement): FComponent 
   return comp;
 
   function getAlign() {
-    return content instanceof PIXI.Text ? content.style.align : content.align as AlignType;
+    return content instanceof PIXI.Text ? content.style.align : content.align;
   }
 
-  function setAlign(align: AlignType = 'left') {
+  function setAlign(align: PIXI.TextStyleAlign = 'left') {
     if (content instanceof PIXI.Text) {
       content.style.align = align;
     }
@@ -92,6 +92,7 @@ function text(context: Context, {attributes}: TextSourceMapElement): FComponent 
       right: holder.width - content.width,
       left: 0,
       center: divide(holder.width, 2),
+      justify: 0, // todo
     }[align];
   }
 
