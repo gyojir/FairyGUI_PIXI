@@ -73,9 +73,11 @@ function setGraphics({
   const it = new Graphics();
 
   const lineAlpha = (lineColor >>> 24) / 0xFF;
+  lineColor = lineColor & 0x00FFFFFF;
   it.lineStyle(lineSize, lineColor, lineAlpha);
 
   const fillAlpha = (fillColor >>> 24) / 0xFF;
+  fillColor = fillColor & 0x00FFFFFF;
   it.beginFill(fillColor, fillAlpha);
 
   (it as any)[func]?.(...size);

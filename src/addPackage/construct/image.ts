@@ -15,7 +15,7 @@ function sprite(context: Context, src: string) {
   const atlasConfig = context.selectResourcesConfig(propEq(atlasName, 'id')) as ResourceAttributesForAtlas;
   assertIsDefined(atlasConfig);
   // get atlas texture
-  const texRes = context.getResource(atlasConfig.file)?.texture;
+  const texRes = context.getResource(atlasConfig.file);
   assertIsDefined(texRes);
   const texture = new PIXI.Texture(texRes.baseTexture, rect);
 

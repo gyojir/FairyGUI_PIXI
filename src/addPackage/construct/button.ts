@@ -5,7 +5,7 @@ import {SourceMapElement, FComponent, XmlElem} from '../../def/index';
 
 export const Button = (source: SourceMapElement) => (it: FComponent) => {
   it.interactive = true;
-  it.buttonMode = true;
+  it.cursor = 'pointer';;
 
   it
     .on('pointerdown', onButtonDown)
@@ -28,6 +28,10 @@ export const Button = (source: SourceMapElement) => (it: FComponent) => {
     const image = it.getChildByName(attributes.name);
     const indexes = toPair(find(({name}: {name: string}) => name === 'gearDisplay', elements)?.attributes.pages);
 
+    if (image == null){
+      return {};
+    }
+
     return reduce<number, {[x: number]: PIXI.DisplayObject}>((pages, index) => {
       pages[index] = image;
       return pages;
@@ -39,27 +43,27 @@ export const Button = (source: SourceMapElement) => (it: FComponent) => {
     pages[state].visible = true;
   }
 
-  function onButtonUp(event: number) {
+  function onButtonUp(event: PIXI.FederatedPointerEvent) {
     setState(2);
     it.emit('buttonUp');
   }
 
-  function onButtonDown(event: number) {
+  function onButtonDown(event: PIXI.FederatedPointerEvent) {
     setState(1);
     it.emit('buttonDown');
   }
 
-  function onButtonOver(event: number) {
+  function onButtonOver(event: PIXI.FederatedPointerEvent) {
     setState(2);
     it.emit('buttonOver');
   }
 
-  function onButtonOut(event: number) {
+  function onButtonOut(event: PIXI.FederatedPointerEvent) {
     setState(0);
     it.emit('buttonOut');
   }
 
-  function onButtonUpOutSide(event: number) {
+  function onButtonUpOutSide(event: PIXI.FederatedPointerEvent) {
     setState(0);
     it.emit('buttonUpOutSide');
   }

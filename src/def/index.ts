@@ -1,9 +1,10 @@
 import * as PIXI from 'pixi.js';
+import { LoaderResource } from '../util/loader/Loader';
 export type Context = {
   getRootSource: (key: string) => SourceMapElement | FontSourceMapElement;
   selectResourcesConfig: <Pred extends (x: ResourceAttribute) => boolean>(predicate: Pred) => ResourceAttribute;
   selectTextureAtlasConfig: <Pred extends (x: TextureAtlasConfig) => boolean>(predicate: Pred) => TextureAtlasConfig[];
-  getResource: (name: string) => PIXI.LoaderResource;
+  getResource: (name: string) => LoaderResource;
   getChild: (key: string) => PIXI.Graphics;
 };
 
@@ -228,7 +229,7 @@ export interface FComponent extends PIXI.Container{
   __height?: number;
   blendMode?: PIXI.BLEND_MODES;
   transition?: Transition;
-  tint: number;
+  tint: PIXI.ColorSource;
   anim?: PIXI.AnimatedSprite;
   content?: PIXI.DisplayObject; // text
   group?: string;

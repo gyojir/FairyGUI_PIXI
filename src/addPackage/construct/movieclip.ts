@@ -35,7 +35,7 @@ function toFrames(context: Context, src: string, offsets: number[][]) {
     const atlasName = getAtlasName(id, atlasIndex);
     const atlasConfig = context.selectResourcesConfig(propEq(atlasName, 'id')) as ResourceAttributesForAtlas;
     assertIsDefined(atlasConfig);
-    const texRes = context.getResource(atlasConfig.file)?.texture;
+    const texRes = context.getResource(atlasConfig.file);
     assertIsDefined(texRes);
 
     return new PIXI.Texture(texRes.baseTexture, rect);

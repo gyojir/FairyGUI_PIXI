@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js';
 import {Graphics, ObservablePoint} from 'pixi.js';
 
 import {component} from './component';
@@ -64,12 +65,24 @@ function group(context: Context, {attributes}: SourceMapElement) {
   }
 }
 
-export function placeHolder(width: number, height: number) {
-  const holder = new Graphics();
+class DummyGraphics extends Graphics {
+  public __width: number = 0;
+  public __height: number = 0;
+  
+  protected _calculateBounds(): void
+  {
+    this._bounds.addFrame(this.transform, 0, 0, this.__width, this.__height);
+  }
+}
 
-  holder.beginFill(0xffffff, 0);
-  holder.drawRect(0, 0, width, height);
-  holder.endFill();
+export function placeHolder(width: number, height: number) {
+  const holder = new DummyGraphics();
+  holder.__width = width;
+  holder.__height = height;
+
+  // holder.beginFill(0xffffff, 0);
+  // holder.drawRect(0, 0, width, height);
+  // holder.endFill();
 
   return holder;
 }

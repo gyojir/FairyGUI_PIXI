@@ -10,6 +10,7 @@ import {select} from '../util';
 import {construct} from './construct';
 import {TextureAtlasConfig, SourceMapElement, assertIsDefined, XmlElem, ResourceAttribute, ResourceAttributesFont, Context, FontSourceMapElement} from '../def/index';
 import {sprite} from './construct/image';
+import { Loader } from '../util/loader/Loader';
 
 /**
  *   >  Analysing Fairy Config File
@@ -35,7 +36,7 @@ import {sprite} from './construct/image';
  * @param {string} packageName
  * @return { function(string): PIXI.Container }
  */
-function addPackage(app: {loader: PIXI.Loader}, packageName: string) {
+function addPackage(app: PIXI.Application, loader: Loader, packageName: string) {
   //  Temp Global
   let context: Context = {
     getRootSource,
@@ -132,11 +133,11 @@ function addPackage(app: {loader: PIXI.Loader}, packageName: string) {
   }
 
   function getResource(name: string) {
-    return app.loader.resources[packageName + '@' + name];
+    return loader.getResource(packageName + '@' + name);
   }
 
   function getBinaryData(packageName: string): ArrayBuffer {
-    return app.loader.resources[packageName + '.fui'].data;
+    return loader.getResource(packageName + '.fui').data;
   }
 }
 

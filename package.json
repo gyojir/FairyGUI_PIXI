@@ -53,7 +53,7 @@
     "flow-bin": "^0.244.0",
     "html-webpack-plugin": "^5.6.0",
     "minimist": "^1.2.8",
-    "pixi.js": "^6.5.10",
+    "pixi.js": "^7.4.2",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "stream-browserify": "^3.0.0",
