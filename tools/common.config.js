@@ -21,6 +21,9 @@ module.exports = function(...args) {
     resolve: {
       extensions: [".js", ".json", ".ts"],
     },
+    externals: {
+      'pixi.js': true,
+    },
 
     //  Output  ===========================================
     output: {
